@@ -1,10 +1,9 @@
 package views
 
 import tornadofx.*
-import kotlin.properties.Delegates
 
 class Greeting(var name: String, gr: String? = null) {
-    var greet: String by Delegates.observable(gr ?: "Hi")
+    val greet = gr ?: "Hi"
     val final
         get() = toString()
 
