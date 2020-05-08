@@ -1,5 +1,8 @@
 package model
 
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Table
 
 object ItemSlots : AdventureTable("ITEM_SLOT") {
@@ -9,6 +12,13 @@ object ItemSlots : AdventureTable("ITEM_SLOT") {
     init {
         uniqueIndex(adventure, name)
     }
+}
+
+class ItemSlot(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<ItemSlot>(ItemSlots)
+
+    var name by ItemSlots.name
+    var capacity by ItemSlots.capacity
 }
 
 object PlayerAvailableSlots : Table("PLAYER_AVAILABLE_SLOT") {
@@ -28,8 +38,23 @@ object Items : AdventureTable("ITEM") {
     }
 }
 
+class Item(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<Item>(Items)
+
+    var name by Items.name
+    var isConsumable by Items.isConsumable
+
+    var itemSlot by ItemSlot referencedOn Items.itemSlot
+}
+
 object Loots : AdventureTable("LOOT") {
     val desc = varchar("desc", 64)
+}
+
+class Loot(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<Loot>(Loots)
+
+    var desc by Loots.desc
 }
 
 object LootsItems : Table("LOOT_ITEM") {

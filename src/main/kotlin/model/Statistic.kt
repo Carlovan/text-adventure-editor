@@ -1,5 +1,8 @@
 package model
 
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Table
 
 object Statistics : AdventureTable("STATISTIC") {
@@ -8,6 +11,12 @@ object Statistics : AdventureTable("STATISTIC") {
     init {
         uniqueIndex(adventure, name)
     }
+}
+
+class Statistic(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<Statistic>(Statistics)
+
+    var name by Statistics.name
 }
 
 object StatisticsSkills : Table("STATISTIC_SKILL") {
