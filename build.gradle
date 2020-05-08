@@ -18,6 +18,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
+    // PostgreSQL driver
+    implementation "org.slf4j:slf4j-nop:1.7.25"
+    implementation "org.postgresql:postgresql:42.2.2"
+
     // ORM library
     implementation "org.jetbrains.exposed:exposed-core:0.24.1"
     implementation "org.jetbrains.exposed:exposed-dao:0.24.1"
