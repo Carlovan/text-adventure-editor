@@ -15,7 +15,12 @@ fun main(args: Array<String>) {
 
     transaction {
         addLogger(StdOutSqlLogger)
-        SchemaUtils.create(Adventures, Steps, Choices, DiceConstraint)
+
+        SchemaUtils.create(Adventures, Steps, Choices, DiceConstraints,
+            Skills, PlayerConfigurations, PlayerConfigurationsSkills, SkillConstraints,
+            Statistics, StatisticContraints, StatisticsSkills, Enemies, EnemiesStatistics,
+            Items, ItemSlots, Loots, LootsItems, PlayerAvailableSlots, EnemiesSteps, StatisticsItems,
+            ItemConstraints, ItemSkillActivations, StatisticsPlayerConfigurations)
     }
 
     launch<TextAdventureEditorApp>(args)

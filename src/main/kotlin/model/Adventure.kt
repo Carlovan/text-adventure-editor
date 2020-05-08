@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 
 object Adventures : IntIdTable("ADVENTURE") {
-    val name = varchar("name", 60)
+    val name = varchar("name", 64)
 }
 
 abstract class AdventureTable(name: String) : IntIdTable(name) {
@@ -19,6 +19,7 @@ abstract class AdventureTable(name: String) : IntIdTable(name) {
 object Steps : AdventureTable("STEP") {
     val number = integer("number")
     val text = text("text")
+    val loot = reference("loot", Loots).nullable()
 
     init {
         uniqueIndex(adventure, number)
@@ -30,4 +31,13 @@ object Choices : AdventureTable("CHOICE") {
 
     val stepTo = reference("stepTo", Steps)
     val stepFrom = reference("stepFrom", Steps)
+}
+
+object PlayerConfigurations : AdventureTable("PLAYER_CONFIGURATION") {
+    val name = varchar("name", 16)
+    val max_skills = integer("max_skills")
+
+    init {
+        uniqueIndex(adventure, name)
+    }
 }
