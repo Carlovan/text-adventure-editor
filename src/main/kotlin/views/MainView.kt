@@ -7,11 +7,14 @@ import tornadofx.*
 import viewmodel.AdventureViewModel
 import viewmodel.StepViewModel
 import java.util.*
+import kotlin.reflect.KClass
 
 class MainView: View() {
     val l = label("Hello!")
 
     override val root = borderpane()
+
+    var contentView: View = find(SelectAdventureView::class)
 
     init {
         with(root) {
@@ -19,12 +22,14 @@ class MainView: View() {
                 menu("Adventure") {
                     item("Change adventure") {
                         action {
-                            root.center<SelectAdventureView>()
+                            contentView.replaceWith<SelectAdventureView>()
+                            contentView = find(SelectAdventureView::class)
                         }
                     }
                     item("Steps") {
                         action {
-                            root.center<StepsMasterView>()
+                            contentView.replaceWith<StepsMasterView>()
+                            contentView = find(StepsMasterView::class)
                         }
                     }
                 }
@@ -36,8 +41,14 @@ class MainView: View() {
 }
 
 class SelectAdventureView : View(){
+    val adventure: AdventureViewModel by inject()
+
     val controller: AdventureController by inject()
     var adventureCombo: ComboBox<AdventureViewModel> by singleAssign()
+
+    init {
+        setInScope(AdventureViewModel(), FX.defaultScope)
+    }
 
     override val root = vbox {
         adventureCombo = combobox {
@@ -45,8 +56,8 @@ class SelectAdventureView : View(){
         }
         button("Set!") {
             action {
-                val adventure = adventureCombo.selectedItem ?: AdventureViewModel()
-                setInScope(adventure, FX.defaultScope)
+                val adventureInner = adventureCombo.selectedItem!!.item
+                adventure.item = adventureInner
             }
         }
     }

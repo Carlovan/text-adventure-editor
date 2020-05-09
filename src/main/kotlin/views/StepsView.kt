@@ -2,37 +2,39 @@ package views
 
 import controller.StepController
 import javafx.collections.ObservableList
+import javafx.scene.control.TableView
 import tornadofx.*
 import viewmodel.StepViewModel
 
 class StepsMasterView : View("Steps") {
     val controller: StepController by inject()
 
-    var stepsTable: TableViewEditModel<StepViewModel> by singleAssign()
-    var steps: ObservableList<StepViewModel> by singleAssign()
+    var stepsTable: TableView<StepViewModel> by singleAssign()
+    var stepsTableEditModel: TableViewEditModel<StepViewModel> by singleAssign()
+    var steps: ObservableList<StepViewModel> = emptyList<StepViewModel>().asObservable()
 
     override val root = borderpane {
         steps = controller.steps
 
         left = vbox {
-            button("Commit") {
+            button("Save") {
                 action {
-                    controller.commit(stepsTable.items
+                    controller.commit(stepsTableEditModel.items
                                                 .asSequence()
                                                 .filter { it.value.isDirty }
                                                 .map { it.key })
-                    stepsTable.commit()
+                    stepsTableEditModel.commit()
                 }
             }
             button("Cancel") {
                 action {
-                    stepsTable.rollback()
+                    stepsTableEditModel.rollback()
                 }
             }
         }
 
-        center = tableview<StepViewModel> {
-            stepsTable = editModel
+        stepsTable =tableview<StepViewModel> {
+            stepsTableEditModel = editModel
             items = steps
 
             enableCellEditing()
@@ -43,5 +45,16 @@ class StepsMasterView : View("Steps") {
 
             smartResize()
         }
+
+        center = stepsTable
+    }
+
+    override fun onDock() {
+        steps = controller.steps
+        stepsTable.items = steps
+    }
+
+    override fun onUndock() {
+        println("On undock")
     }
 }

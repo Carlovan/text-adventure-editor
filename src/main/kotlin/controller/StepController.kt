@@ -3,7 +3,6 @@ package controller
 import javafx.collections.ObservableList
 import model.Step
 import model.Steps
-import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import tornadofx.Controller
 import tornadofx.asObservable
@@ -15,15 +14,15 @@ import java.util.*
 class StepController : AbstractController() {
     val adventure: AdventureViewModel by inject()
 
-    val steps : ObservableList<StepViewModel> by lazy {
-        transaction {
-            Step.find { Steps.adventure eq adventure.item.id }.map {
-                StepViewModel().apply {
-                    item = it
+    val steps : ObservableList<StepViewModel>
+        get() = transaction {
+                    println(adventure.item.id.value)
+                    Step.find { Steps.adventure eq adventure.item.id }.map {
+                        StepViewModel().apply {
+                            item = it
+                        }
+                    }.asObservable()
                 }
-            }.asObservable()
-        }
-    }
 
     fun commit(changes: Sequence<StepViewModel>) {
         transaction {
