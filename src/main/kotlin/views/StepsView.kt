@@ -53,8 +53,4 @@ class StepsMasterView : View("Steps") {
         steps = controller.steps
         stepsTable.items = steps
     }
-
-    override fun onUndock() {
-        println("On undock")
-    }
 }
