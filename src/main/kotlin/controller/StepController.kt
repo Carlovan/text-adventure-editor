@@ -16,7 +16,6 @@ class StepController : AbstractController() {
 
     val steps : ObservableList<StepViewModel>
         get() = transaction {
-                    println(adventure.item.id.value)
                     Step.find { Steps.adventure eq adventure.item.id }.map {
                         StepViewModel().apply {
                             item = it

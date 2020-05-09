@@ -47,12 +47,13 @@ class SelectAdventureView : View(){
     var adventureCombo: ComboBox<AdventureViewModel> by singleAssign()
 
     init {
-        setInScope(AdventureViewModel(), FX.defaultScope)
+        setInScope(controller.adventures[0], FX.defaultScope)
     }
 
     override val root = vbox {
         adventureCombo = combobox {
             items = controller.adventures
+            selectionModel.select(0)
         }
         button("Set!") {
             action {

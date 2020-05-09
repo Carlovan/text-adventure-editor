@@ -7,9 +7,8 @@ import tornadofx.asObservable
 import viewmodel.AdventureViewModel
 
 class AdventureController : AbstractController() {
-    val adventures : ObservableList<AdventureViewModel> by lazy {
-        transaction {
-            Adventure.all().map { AdventureViewModel().apply { item = it} }.asObservable()
-        }
-    }
+    val adventures: ObservableList<AdventureViewModel>
+        get() = transaction {
+                    Adventure.all().map { AdventureViewModel().apply { item = it } }.asObservable()
+                }
 }
