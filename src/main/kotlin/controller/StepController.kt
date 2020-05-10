@@ -11,12 +11,10 @@ import viewmodel.AdventureViewModel
 import viewmodel.StepViewModel
 import java.util.*
 
-class StepController : AbstractController() {
-    val adventure: AdventureViewModel by inject()
-
+class StepController : ControllerWithContextAdventure() {
     val steps : ObservableList<StepViewModel>
         get() = transaction {
-                    Step.find { Steps.adventure eq adventure.item.id }.map {
+                    Step.find { Steps.adventure eq contextAdventure!!.item.id }.map {
                         StepViewModel().apply {
                             item = it
                         }

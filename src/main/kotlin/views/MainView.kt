@@ -10,11 +10,9 @@ import java.util.*
 import kotlin.reflect.KClass
 
 class MainView: View() {
-    val l = label("Hello!")
-
     override val root = borderpane()
 
-    var contentView: View = find(SelectAdventureView::class)
+    var contentView: View = find(StepsMasterView::class)
 
     init {
         with(root) {
@@ -22,8 +20,7 @@ class MainView: View() {
                 menu("Adventure") {
                     item("Change adventure") {
                         action {
-                            contentView.replaceWith<SelectAdventureView>()
-                            contentView = find(SelectAdventureView::class)
+                            replaceWith<SelectAdventureView>()
                         }
                     }
                     item("Steps") {
@@ -35,31 +32,11 @@ class MainView: View() {
                 }
             }
 
-            center<SelectAdventureView>()
+            center<StepsMasterView>()
         }
     }
-}
 
-class SelectAdventureView : View(){
-    val adventure: AdventureViewModel by inject()
-
-    val controller: AdventureController by inject()
-    var adventureCombo: ComboBox<AdventureViewModel> by singleAssign()
-
-    init {
-        setInScope(controller.adventures[0], FX.defaultScope)
-    }
-
-    override val root = vbox {
-        adventureCombo = combobox {
-            items = controller.adventures
-            selectionModel.select(0)
-        }
-        button("Set!") {
-            action {
-                val adventureInner = adventureCombo.selectedItem!!.item
-                adventure.item = adventureInner
-            }
-        }
+    override fun onDock() {
+        contentView.onDock()
     }
 }
