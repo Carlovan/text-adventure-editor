@@ -10,6 +10,10 @@ import org.jetbrains.exposed.sql.Table
 
 object Adventures : IntIdTable("ADVENTURE") {
     val name = varchar("name", 64)
+
+    init {
+        uniqueIndex(name)
+    }
 }
 
 class Adventure(id: EntityID<Int>) : IntEntity(id) {

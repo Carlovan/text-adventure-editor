@@ -1,16 +1,20 @@
 package views
 
 import controller.AdventureController
+import javafx.collections.ObservableList
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
 import tornadofx.*
 import viewmodel.AdventureViewModel
+import java.util.*
 
 class SelectAdventureView : View(){
     val controller: AdventureController by inject()
 
+    var adventures: ObservableList<AdventureViewModel> = emptyList<AdventureViewModel>().toObservable()
     var adventureCombo: ComboBox<AdventureViewModel> by singleAssign()
     var newAdventure: AdventureViewModel = AdventureViewModel()
+    var newAdventureNameTextField: TextField by singleAssign()
 
     init {
         setInScope(AdventureViewModel(), FX.defaultScope)
@@ -21,7 +25,7 @@ class SelectAdventureView : View(){
             fieldset("Select adventure") {
                 field("Adventure") {
                     adventureCombo = combobox<AdventureViewModel> {
-                        items = controller.adventures
+                        items = adventures
                     }
                 }
                 button("Set") {
@@ -41,9 +45,6 @@ class SelectAdventureView : View(){
                         newAdventure.commit {
                             val newAdventureFull = controller.createAdventure(newAdventure)
                             controller.contextAdventure = newAdventureFull
-                            adventureCombo.items.add(newAdventureFull)
-                            adventureCombo.selectionModel.select(newAdventureFull)
-                            newAdventure = AdventureViewModel()
                         }
                         goToMainView()
                     }
@@ -54,5 +55,11 @@ class SelectAdventureView : View(){
 
     fun goToMainView() {
         replaceWith<MainView>()
+    }
+
+    override fun onDock() {
+        adventures.clear()
+        adventures.addAll(controller.adventures)
+        adventureCombo.selectionModel.select(controller.contextAdventure)
     }
 }
