@@ -22,4 +22,15 @@ class AdventureController : ControllerWithContextAdventure() {
         }
         return res
     }
+
+    fun deleteAdventure(adventure: AdventureViewModel) {
+        adventure.item?.let {
+            if (contextAdventure?.item == it) {
+                contextAdventure = null
+            }
+            transaction {
+                it.delete()
+            }
+        }
+    }
 }
