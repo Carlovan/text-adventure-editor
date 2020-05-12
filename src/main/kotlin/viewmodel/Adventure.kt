@@ -1,6 +1,7 @@
 package viewmodel
 
 import model.Adventure
+import model.AdventureCreate
 import tornadofx.ItemViewModel
 
 class AdventureViewModel : ItemViewModel<Adventure>() {
@@ -10,4 +11,8 @@ class AdventureViewModel : ItemViewModel<Adventure>() {
     override fun toString(): String {
         return name.value
     }
+}
+
+class AdventureCreateViewModel : ItemViewModel<AdventureCreate>(AdventureCreate()) {
+    val name = bind(AdventureCreate::name)
 }

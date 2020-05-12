@@ -4,7 +4,9 @@ import controller.AdventureController
 import javafx.beans.value.ObservableBooleanValue
 import javafx.collections.ObservableList
 import javafx.scene.control.ComboBox
+import model.AdventureCreate
 import tornadofx.*
+import viewmodel.AdventureCreateViewModel
 import viewmodel.AdventureViewModel
 
 val <T> ComboBox<T>.anySelected: ObservableBooleanValue
@@ -15,7 +17,7 @@ class SelectAdventureView : View(){
 
     private val adventures: ObservableList<AdventureViewModel> = emptyList<AdventureViewModel>().toObservable()
     private var adventureCombo: ComboBox<AdventureViewModel> by singleAssign()
-    private var newAdventure = AdventureViewModel()
+    private var newAdventure = AdventureCreateViewModel()
 
     init {
         setInScope(AdventureViewModel(), FX.defaultScope) // So that it can be accessed anywhere by injection
@@ -56,9 +58,10 @@ class SelectAdventureView : View(){
                     enableWhen(newAdventure.valid)
                     action {
                         newAdventure.commit {
-                            // TODO clear form in some way, maybe using a different model for adventure creation
                             val newAdventureFull = controller.createAdventure(newAdventure)
+                            newAdventure.item = AdventureCreate()
                             goToMainView(newAdventureFull)
+                            // TODO clear validation, maybe using a Fragment
                         }
                     }
                 }
