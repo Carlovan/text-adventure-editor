@@ -3,8 +3,8 @@ package controller
 import javafx.collections.ObservableList
 import model.Adventure
 import org.jetbrains.exposed.sql.transactions.transaction
+import tornadofx.Controller
 import tornadofx.asObservable
-import viewmodel.AdventureCreateViewModel
 import viewmodel.AdventureViewModel
 
 class AdventureController : ControllerWithContextAdventure() {
@@ -13,11 +13,11 @@ class AdventureController : ControllerWithContextAdventure() {
                     Adventure.all().map { AdventureViewModel().apply { item = it } }.asObservable()
                 }
 
-    fun createAdventure(adventure: AdventureCreateViewModel) : AdventureViewModel {
+    fun createAdventure(adventure: AdventureViewModel) : AdventureViewModel {
         val res = AdventureViewModel()
         transaction {
             Adventure.new {
-                assignFrom(adventure.item)
+                name = adventure.name.value
             }.also { res.item = it }
         }
         return res
