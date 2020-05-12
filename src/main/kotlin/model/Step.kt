@@ -15,9 +15,11 @@ object Steps : AdventureTable("STEP") {
 }
 
 class Step(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Step>(Steps)
+    companion object : IntEntityClass<Step>(Steps) {
+        const val MIN_NUMBER = 1
+    }
 
-    var number by Steps.number
+    var number by Steps.number.apply { defaultValueFun = {0} }
     var text by Steps.text
     var loot by Loot optionalReferencedOn Steps.loot
 

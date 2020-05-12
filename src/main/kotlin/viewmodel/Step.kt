@@ -1,9 +1,8 @@
 package viewmodel
 
 import model.Step
-import tornadofx.*
 
-class StepViewModel : ItemViewModel<Step>() {
+class StepViewModel : CommittableItemViewModel<Step>() {
     val number = bind(Step::number)
     val text = bind(Step::text)
 }

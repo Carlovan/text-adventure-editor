@@ -7,7 +7,7 @@ import tornadofx.*
 import viewmodel.StepViewModel
 
 class StepsMasterView : View("Steps") {
-    val controller: StepController by inject()
+    private val controller: StepController by inject()
 
     var stepsTable: TableView<StepViewModel> by singleAssign()
     var stepsTableEditModel: TableViewEditModel<StepViewModel> by singleAssign()
@@ -17,6 +17,7 @@ class StepsMasterView : View("Steps") {
         steps = controller.steps
 
         left = vbox {
+            spacing = 10.0
             button("Save") {
                 action {
                     controller.commit(stepsTableEditModel.items
@@ -31,9 +32,15 @@ class StepsMasterView : View("Steps") {
                     stepsTableEditModel.rollback()
                 }
             }
+            button("New") {
+                action {
+                    find<CreateStepModal>().openModal(block = true)
+                    updateData()
+                }
+            }
         }
 
-        stepsTable =tableview<StepViewModel> {
+        stepsTable = tableview {
             stepsTableEditModel = editModel
             items = steps
 
@@ -49,8 +56,12 @@ class StepsMasterView : View("Steps") {
         center = stepsTable
     }
 
-    override fun onDock() {
+    private fun updateData() {
         steps = controller.steps
         stepsTable.items = steps
+    }
+
+    override fun onDock() {
+        updateData()
     }
 }
