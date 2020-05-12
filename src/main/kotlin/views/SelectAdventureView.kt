@@ -78,11 +78,13 @@ class SelectAdventureView : View(){
     }
 
     private fun updateData() {
-        with(adventures) {
-            clear()
-            addAll(controller.adventures)
+        runWithLoading { controller.adventures } ui {
+            with(adventures) {
+                clear()
+                addAll(it)
+            }
+            adventureCombo.valueProperty().set(controller.contextAdventure)
         }
-        adventureCombo.valueProperty().set(controller.contextAdventure)
     }
 
     override fun onDock() {
