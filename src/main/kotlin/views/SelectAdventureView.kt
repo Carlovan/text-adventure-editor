@@ -56,8 +56,12 @@ class SelectAdventureView : View(){
                     enableWhen(newAdventure.valid)
                     action {
                         newAdventure.commit {
-                            // TODO clear form in some way, maybe using a different model for adventure creation
                             val newAdventureFull = controller.createAdventure(newAdventure)
+                            with(newAdventure) {
+                                item = null
+                                rollback()
+                                clearDecorators() // Remove validation
+                            }
                             goToMainView(newAdventureFull)
                         }
                     }
@@ -78,7 +82,7 @@ class SelectAdventureView : View(){
             clear()
             addAll(controller.adventures)
         }
-        adventureCombo.value = controller.contextAdventure
+        adventureCombo.valueProperty().set(controller.contextAdventure)
     }
 
     override fun onDock() {

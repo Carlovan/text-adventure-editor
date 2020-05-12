@@ -3,7 +3,6 @@ package controller
 import javafx.collections.ObservableList
 import model.Adventure
 import org.jetbrains.exposed.sql.transactions.transaction
-import tornadofx.Controller
 import tornadofx.asObservable
 import viewmodel.AdventureViewModel
 
@@ -17,7 +16,7 @@ class AdventureController : ControllerWithContextAdventure() {
         val res = AdventureViewModel()
         transaction {
             Adventure.new {
-                name = adventure.name.value
+                adventure.commitTo(this)
             }.also { res.item = it }
         }
         return res

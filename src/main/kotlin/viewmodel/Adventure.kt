@@ -1,9 +1,8 @@
 package viewmodel
 
 import model.Adventure
-import tornadofx.ItemViewModel
 
-class AdventureViewModel : ItemViewModel<Adventure>() {
+class AdventureViewModel : CommittableItemViewModel<Adventure>() {
     val id = bind(Adventure::id)
     val name = bind(Adventure::name)
 
