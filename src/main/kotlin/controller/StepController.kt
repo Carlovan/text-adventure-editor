@@ -8,15 +8,16 @@ import tornadofx.asObservable
 import viewmodel.StepViewModel
 
 class StepController : ControllerWithContextAdventure() {
-    val steps : ObservableList<StepViewModel>
-        get() = transaction {
-                    Step.find { Steps.adventure eq contextAdventure!!.item.id }.sortedBy { it.number }
-                        .map {
-                            StepViewModel().apply {
-                                item = it
-                            }
-                        }.asObservable()
-                }
+    val steps : ObservableList<StepViewModel> by cachedProperty {
+        transaction {
+            Step.find { Steps.adventure eq contextAdventure!!.item.id }.sortedBy { it.number }
+                .map {
+                    StepViewModel().apply {
+                        item = it
+                    }
+                }.asObservable()
+        }
+    }
 
     fun commit(changes: Sequence<StepViewModel>) {
         transaction {
@@ -31,5 +32,6 @@ class StepController : ControllerWithContextAdventure() {
                 step.commitTo(this)
             }
         }
+        invalidateProperty(::steps) // I don't know if I like this
     }
 }
