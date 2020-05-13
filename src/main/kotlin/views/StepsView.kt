@@ -57,8 +57,10 @@ class StepsMasterView : View("Steps") {
     }
 
     private fun updateData() {
-        steps = controller.steps
-        stepsTable.items = steps
+        runWithLoading { controller.steps } ui {
+            steps.clear()
+            steps.addAll(it)
+        }
     }
 
     override fun onDock() {
