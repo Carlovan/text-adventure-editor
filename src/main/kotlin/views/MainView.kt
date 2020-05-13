@@ -1,6 +1,5 @@
 package views
 
-import javafx.concurrent.Task
 import tornadofx.*
 
 class MainView: View() {
@@ -22,7 +21,9 @@ class MainView: View() {
     }
 
     override fun onDock() {
-        root.center = null;
-        root.center<StepsMasterView>()
+        with(root) {
+            center = null // So that child onDock is called
+            center<StepsMasterView>()
+        }
     }
 }

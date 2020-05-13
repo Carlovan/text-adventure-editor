@@ -1,7 +1,5 @@
 package model
 
-import model.DiceConstraints.nullable
-
 abstract class Constraints(name: String) : AdventureTable(name) {
     val choice = reference("choice", Choices)
 }

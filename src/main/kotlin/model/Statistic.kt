@@ -5,8 +5,6 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Table
 
-import tornadofx.*
-
 object Statistics : AdventureTable("STATISTIC") {
     val name = varchar("name", 32)
 

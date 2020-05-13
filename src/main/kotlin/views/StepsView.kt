@@ -1,21 +1,16 @@
 package views
 
 import controller.StepController
-import javafx.collections.ObservableList
-import javafx.scene.control.TableView
 import tornadofx.*
 import viewmodel.StepViewModel
 
 class StepsMasterView : View("Steps") {
     private val controller: StepController by inject()
 
-    var stepsTable: TableView<StepViewModel> by singleAssign()
     var stepsTableEditModel: TableViewEditModel<StepViewModel> by singleAssign()
-    var steps: ObservableList<StepViewModel> = emptyList<StepViewModel>().asObservable()
+    var steps = observableListOf<StepViewModel>()
 
     override val root = borderpane {
-        steps = controller.steps
-
         left = vbox {
             spacing = 10.0
             button("Save") {
@@ -40,7 +35,7 @@ class StepsMasterView : View("Steps") {
             }
         }
 
-        stepsTable = tableview {
+        center = tableview<StepViewModel> {
             stepsTableEditModel = editModel
             items = steps
 
@@ -52,8 +47,6 @@ class StepsMasterView : View("Steps") {
 
             smartResize()
         }
-
-        center = stepsTable
     }
 
     private fun updateData() {
