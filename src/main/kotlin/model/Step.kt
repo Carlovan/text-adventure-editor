@@ -19,7 +19,7 @@ class Step(id: EntityID<Int>) : IntEntity(id) {
         const val MIN_NUMBER = 1
     }
 
-    var number by Steps.number.apply { defaultValueFun = {0} }
+    var number by Steps.number
     var text by Steps.text
     var loot by Loot optionalReferencedOn Steps.loot
 

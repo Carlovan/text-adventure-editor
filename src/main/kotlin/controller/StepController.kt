@@ -6,6 +6,7 @@ import model.Steps
 import org.jetbrains.exposed.sql.transactions.transaction
 import tornadofx.asObservable
 import viewmodel.StepViewModel
+import viewmodel.fromViewModel
 
 class StepController : ControllerWithContextAdventure() {
     val steps : ObservableList<StepViewModel> by cachedProperty {
@@ -29,7 +30,7 @@ class StepController : ControllerWithContextAdventure() {
         transaction {
             Step.new {
                 adventure = contextAdventure!!.item
-                step.commitTo(this)
+                fromViewModel(step)
             }
         }
         invalidateProperty(::steps) // I don't know if I like this

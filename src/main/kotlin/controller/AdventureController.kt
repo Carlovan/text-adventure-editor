@@ -5,6 +5,7 @@ import model.Adventure
 import org.jetbrains.exposed.sql.transactions.transaction
 import tornadofx.asObservable
 import viewmodel.AdventureViewModel
+import viewmodel.fromViewModel
 
 class AdventureController : ControllerWithContextAdventure() {
     val adventures: ObservableList<AdventureViewModel>
@@ -16,7 +17,7 @@ class AdventureController : ControllerWithContextAdventure() {
         val res = AdventureViewModel()
         transaction {
             Adventure.new {
-                adventure.commitTo(this)
+                fromViewModel(adventure)
             }.also { res.item = it }
         }
         return res
