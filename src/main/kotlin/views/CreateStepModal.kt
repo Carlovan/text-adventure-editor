@@ -12,7 +12,7 @@ class CreateStepModal: Fragment() {
     private val existingNumbers = controller.steps.map { it.number.value }.toSortedSet()
 
     private fun getMissingNumbers(max: Int = existingNumbers.lastOrNull() ?: 0): Collection<Int> {
-        return (1 until max)
+        return (Step.MIN_NUMBER until max)
             .filterNot(existingNumbers::contains)
     }
 
@@ -32,7 +32,7 @@ class CreateStepModal: Fragment() {
                     }
                     filterInput { it.controlNewText.isInt() }
                     promptText = "Step number"
-                    text = (getMissingNumbers().lastOrNull() ?: existingNumbers.size + 1).toString()
+                    text = (getMissingNumbers().firstOrNull() ?: existingNumbers.size + 1).toString()
                 }
             }
             field("Step text") {

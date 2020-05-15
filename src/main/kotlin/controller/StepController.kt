@@ -11,7 +11,7 @@ import viewmodel.fromViewModel
 class StepController : ControllerWithContextAdventure() {
     val steps : ObservableList<StepViewModel> by cachedProperty {
         transaction {
-            Step.find { Steps.adventure eq contextAdventure!!.item.id }.sortedBy { it.number }
+            Step.find { Steps.adventure eq contextAdventure!!.item.id }
                 .map {
                     StepViewModel().apply {
                         item = it

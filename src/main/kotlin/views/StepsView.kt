@@ -12,9 +12,43 @@ class StepsMasterView : View("Steps") {
     var steps = observableListOf<StepViewModel>()
 
     override val root = borderpane {
+        stepsTable = tableview {
+            items = steps
+
+            enableCellEditing()
+            enableDirtyTracking()
+
+            val numberColumn = column("Number", StepViewModel::number).makeEditable()
+            column("Description", StepViewModel::text).makeEditable()
+
+            sortOrder.add(numberColumn)
+
+            smartResize()
+        }
+
         left = vbox {
             spacing = 10.0
+            paddingAll = 10.0
+            button("New") {
+                maxWidth = Double.MAX_VALUE
+                action {
+                    find<CreateStepModal>().openModal(block = true)
+                    updateData()
+                }
+            }
+            button("Delete") {
+                maxWidth = Double.MAX_VALUE
+                enableWhen { stepsTable.anySelected }
+                action {
+                    runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
+                        updateData()
+                    }
+                }
+            }
+            separator()
             button("Save") {
+                maxWidth = Double.MAX_VALUE
+                enableWhen(stepsTable.isDirty)
                 action {
                     with(stepsTable.editModel) {
                         controller.commit(items
@@ -25,37 +59,15 @@ class StepsMasterView : View("Steps") {
                     }
                 }
             }
-            button("Cancel") {
+            button("Discard") {
+                maxWidth = Double.MAX_VALUE
+                enableWhen(stepsTable.isDirty)
                 action {
                     stepsTable.editModel.rollback()
                 }
             }
-            button("New") {
-                action {
-                    find<CreateStepModal>().openModal(block = true)
-                    updateData()
-                }
-            }
-            button("Delete") {
-                action {
-                    runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
-                        updateData()
-                    }
-                }
-            }
         }
 
-        stepsTable = tableview {
-            items = steps
-
-            enableCellEditing()
-            enableDirtyTracking()
-
-            column("Number", StepViewModel::number).makeEditable()
-            column("Description", StepViewModel::text).makeEditable()
-
-            smartResize()
-        }
         center = stepsTable
     }
 
@@ -63,6 +75,7 @@ class StepsMasterView : View("Steps") {
         runWithLoading { controller.steps } ui {
             steps.clear()
             steps.addAll(it)
+            stepsTable.sort()
         }
     }
 
