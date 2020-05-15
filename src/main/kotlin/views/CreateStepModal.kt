@@ -44,8 +44,8 @@ class CreateStepModal: Fragment() {
                 enableWhen(newStep.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    controller.createStep(newStep)
-                    close()
+                    // I don't know why runLater is required...
+                    runWithLoading { controller.createStep(newStep) } ui { runLater { close() } }
                 }
             }
         }

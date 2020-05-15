@@ -1,6 +1,7 @@
 package views
 
 import controller.StepController
+import javafx.event.EventHandler
 import tornadofx.*
 import viewmodel.StepViewModel
 
