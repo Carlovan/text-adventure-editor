@@ -1,14 +1,10 @@
 package views
 
 import controller.AdventureController
-import javafx.beans.value.ObservableBooleanValue
 import javafx.collections.ObservableList
 import javafx.scene.control.ComboBox
 import tornadofx.*
 import viewmodel.AdventureViewModel
-
-val <T> ComboBox<T>.anySelected: ObservableBooleanValue
-get() = this.selectionModel.selectedItemProperty().isNotNull
 
 class SelectAdventureView : View(){
     private val controller: AdventureController by inject()
