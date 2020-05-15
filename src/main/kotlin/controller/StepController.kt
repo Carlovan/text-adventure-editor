@@ -33,6 +33,13 @@ class StepController : ControllerWithContextAdventure() {
                 fromViewModel(step)
             }
         }
-        invalidateProperty(::steps) // I don't know if I like this
+        invalidateProperty(::steps)
+    }
+
+    fun deleteStep(step: StepViewModel) {
+        transaction {
+            step.item.delete()
+        }
+        invalidateProperty(::steps)
     }
 }

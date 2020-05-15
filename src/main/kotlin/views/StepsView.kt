@@ -1,14 +1,14 @@
 package views
 
 import controller.StepController
-import javafx.event.EventHandler
+import javafx.scene.control.TableView
 import tornadofx.*
 import viewmodel.StepViewModel
 
 class StepsMasterView : View("Steps") {
     private val controller: StepController by inject()
 
-    var stepsTableEditModel: TableViewEditModel<StepViewModel> by singleAssign()
+    var stepsTable: TableView<StepViewModel> by singleAssign()
     var steps = observableListOf<StepViewModel>()
 
     override val root = borderpane {
@@ -16,16 +16,18 @@ class StepsMasterView : View("Steps") {
             spacing = 10.0
             button("Save") {
                 action {
-                    controller.commit(stepsTableEditModel.items
-                                                .asSequence()
-                                                .filter { it.value.isDirty }
-                                                .map { it.key })
-                    stepsTableEditModel.commit()
+                    with(stepsTable.editModel) {
+                        controller.commit(items
+                                        .asSequence()
+                                        .filter { it.value.isDirty }
+                                        .map { it.key })
+                        commit()
+                    }
                 }
             }
             button("Cancel") {
                 action {
-                    stepsTableEditModel.rollback()
+                    stepsTable.editModel.rollback()
                 }
             }
             button("New") {
@@ -34,10 +36,16 @@ class StepsMasterView : View("Steps") {
                     updateData()
                 }
             }
+            button("Delete") {
+                action {
+                    runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
+                        updateData()
+                    }
+                }
+            }
         }
 
-        center = tableview<StepViewModel> {
-            stepsTableEditModel = editModel
+        stepsTable = tableview {
             items = steps
 
             enableCellEditing()
@@ -48,6 +56,7 @@ class StepsMasterView : View("Steps") {
 
             smartResize()
         }
+        center = stepsTable
     }
 
     private fun updateData() {
