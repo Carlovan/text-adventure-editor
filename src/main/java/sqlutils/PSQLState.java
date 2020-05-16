@@ -240,7 +240,8 @@ public enum PSQLState {
     ASSERT_FAILURE("P0004"),
     INTERNAL_ERROR("XX000"),
     DATA_CORRUPTED("XX001"),
-    INDEX_CORRUPTED("XX002");
+    INDEX_CORRUPTED("XX002"),
+    UNKNOWN("asd");
 
     private final String code;
 
