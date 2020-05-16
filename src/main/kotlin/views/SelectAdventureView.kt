@@ -3,6 +3,9 @@ package views
 import controller.AdventureController
 import javafx.collections.ObservableList
 import javafx.scene.control.ComboBox
+import onEmpty
+import peek
+import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.AdventureViewModel
 
@@ -30,15 +33,21 @@ class SelectAdventureView : View(){
                     button("Set") {
                         enableWhen { adventureCombo.anySelected }
                         action {
-                            goToMainView(adventureCombo.selectedItem)
+                            controller.contextAdventure = adventureCombo.selectedItem
+                            goToMainView()
                         }
                     }
                     button("Delete") {
                         enableWhen { adventureCombo.anySelected }
                         action {
                             adventureCombo.selectedItem?.let {
-                                controller.deleteAdventure(it)
-                                updateData()
+                                runWithLoading { controller.deleteAdventure(it) } ui {
+                                    it.peek {errorAlert { when(it) {
+                                            PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Adventure, it is related to other entities"
+                                            else -> null
+                                        } } }
+                                        .onEmpty { updateData() }
+                                }
                             }
                         }
                     }
@@ -52,13 +61,25 @@ class SelectAdventureView : View(){
                     enableWhen(newAdventure.valid)
                     action {
                         newAdventure.commit {
-                            val newAdventureFull = controller.createAdventure(newAdventure)
-                            with(newAdventure) {
-                                item = null
-                                rollback()
-                                clearDecorators() // Remove validation
+                            runWithLoading {
+                                controller.createAdventure(newAdventure, true)
+                                    .peek {
+                                        errorAlert {
+                                            when (it) {
+                                                PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
+                                                else -> null
+                                            }
+                                        }
+                                    }
+                                    .onEmpty {
+                                        with(newAdventure) {
+                                            item = null
+                                            rollback()
+                                            clearDecorators() // Remove validation
+                                        }
+                                        goToMainView()
+                                    }
                             }
-                            goToMainView(newAdventureFull)
                         }
                     }
                 }
@@ -66,11 +87,8 @@ class SelectAdventureView : View(){
         }
     }
 
-    private fun goToMainView(contextAdventure: AdventureViewModel?) {
-        if (contextAdventure != null) {
-            controller.contextAdventure = contextAdventure
-            replaceWith<MainView>()
-        }
+    private fun goToMainView() {
+        replaceWith<MainView>()
     }
 
     private fun updateData() {

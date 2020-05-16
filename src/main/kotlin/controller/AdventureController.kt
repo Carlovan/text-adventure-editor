@@ -3,6 +3,8 @@ package controller
 import javafx.collections.ObservableList
 import model.Adventure
 import org.jetbrains.exposed.sql.transactions.transaction
+import sqlutils.MaybePSQLError
+import sqlutils.safeTransaction
 import tornadofx.asObservable
 import viewmodel.AdventureViewModel
 import viewmodel.fromViewModel
@@ -13,24 +15,27 @@ class AdventureController : ControllerWithContextAdventure() {
                     Adventure.all().map { AdventureViewModel().apply { item = it } }.asObservable()
                 }
 
-    fun createAdventure(adventure: AdventureViewModel) : AdventureViewModel {
+    fun createAdventure(adventure: AdventureViewModel, setAsContext: Boolean) : MaybePSQLError {
         val res = AdventureViewModel()
-        transaction {
+        val outcome = safeTransaction {
             Adventure.new {
                 fromViewModel(adventure)
             }.also { res.item = it }
         }
-        return res
+        if (setAsContext) {
+            this.contextAdventure = res
+        }
+        return outcome
     }
 
-    fun deleteAdventure(adventure: AdventureViewModel) {
-        adventure.item?.let {
+    fun deleteAdventure(adventure: AdventureViewModel): MaybePSQLError {
+        return adventure.item?.let {
             if (contextAdventure?.item == it) {
                 contextAdventure = null
             }
-            transaction {
+            safeTransaction {
                 it.delete()
             }
-        }
+        } ?: MaybePSQLError.empty()
     }
 }
