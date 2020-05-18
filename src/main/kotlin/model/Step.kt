@@ -37,7 +37,9 @@ object Choices : AdventureTable("CHOICE") {
 class Choice(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Choice>(Choices)
 
+    var adventure by Adventure referencedOn Choices.adventure
     var text by Choices.text
 
+    var stepFrom by Step referencedOn Choices.stepFrom
     var stepTo by Step referencedOn Choices.stepTo
 }

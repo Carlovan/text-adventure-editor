@@ -2,6 +2,9 @@ package views
 
 import controller.StepController
 import javafx.scene.control.TableView
+import onEmpty
+import peek
+import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StepViewModel
 
@@ -19,7 +22,8 @@ class StepsMasterView : View("Steps") {
             enableDirtyTracking()
 
             val numberColumn = column("Number", StepViewModel::number).makeEditable()
-            column("Description", StepViewModel::text).makeEditable()
+            column("Text", StepViewModel::text)
+            column("Steps to", StepViewModel::stepsTo)
 
             sortOrder.add(numberColumn)
 
@@ -52,10 +56,14 @@ class StepsMasterView : View("Steps") {
                 action {
                     with(stepsTable.editModel) {
                         controller.commit(items
-                                        .asSequence()
-                                        .filter { it.value.isDirty }
-                                        .map { it.key })
-                        commit()
+                            .asSequence()
+                            .filter { it.value.isDirty }
+                            .map { it.key })
+                            .peek {
+                                errorAlert { when(it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                                    else -> null } }
+                            }.onEmpty { commit() }
                     }
                 }
             }
