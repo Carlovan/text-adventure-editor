@@ -3,6 +3,7 @@ package views
 import tornadofx.*
 import views.skill.SkillsView
 import views.statistic.StatisticsView
+import views.step.StepsMasterView
 
 class MainView: View("Text adventure editor") {
     override val root = borderpane {

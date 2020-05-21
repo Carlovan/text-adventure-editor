@@ -33,22 +33,19 @@ class StepController : ControllerWithContextAdventure() {
             change.saveData()
         }
 
-    fun createStep(step: StepViewModel) {
-        transaction {
+    fun createStep(step: StepViewModel) =
+        safeTransaction {
             Step.new {
                 adventure = contextAdventure!!.item
                 fromViewModel(step)
             }
         }
-    }
 
-    fun deleteStep(step: StepViewModel) {
-        transaction {
+    fun deleteStep(step: StepViewModel) =
+        safeTransaction {
             step.item.delete()
         }
-    }
 
-    fun getDetail(master: StepViewModel): DetailStepViewModel {
-        return transaction { DetailStepViewModel(master.item) }
-    }
+    fun getDetail(master: StepViewModel): DetailStepViewModel =
+        transaction { DetailStepViewModel(master.item) }
 }

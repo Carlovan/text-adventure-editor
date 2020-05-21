@@ -34,7 +34,7 @@ class DetailStepViewModel(step: Step? = null) : ItemViewModel<Step>(step) {
     val number = bind(Step::number)
     val text = bind(Step::text)
 
-    val choices = step?.choices?.toList()?.asObservable() ?: observableListOf()
+    val choices get() = item?.choices?.map { ChoiceViewModel(it) }?.toList()?.asObservable() ?: observableListOf()
 
     fun saveData() {
         item?.also {

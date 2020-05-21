@@ -1,13 +1,20 @@
-package views
+package views.step
 
 import controller.StepController
 import javafx.scene.control.TableView
 import onEmpty
+import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import sqlutils.PSQLState
 import tornadofx.*
+import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
 import viewmodel.StepViewModel
+import views.anySelected
+import views.errorAlert
+import views.isDirty
+import views.runWithLoading
+import views.step.CreateStepModal
 
 class StepsMasterView : View("Steps") {
     private val controller: StepController by inject()
@@ -78,8 +85,17 @@ class StepsMasterView : View("Steps") {
     }
 
     private fun deleteStep() {
-        runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
-            updateData()
+        runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {error ->
+            error.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this step, it is related to other entities"
+                        else -> null
+                    }
+                }
+            }.onEmpty {
+                updateData()
+            }
         }
     }
 
@@ -120,6 +136,8 @@ class StepsMasterView : View("Steps") {
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
     val step: DetailStepViewModel by param()
+    val choices = observableListOf<ChoiceViewModel>()
+
     override val root = borderpane {
         paddingAll = 20.0
         center {
@@ -127,6 +145,21 @@ class DetailStepView : Fragment() {
                 spacing = 10.0
                 label("Step number ${step.number.value}")
                 textarea(step.text)
+                label("Choices:")
+                borderpane {
+                    left {
+                        paddingRight = 10.0
+                        button("Add") {
+                            action(::addChoice)
+                        }
+                    }
+                    center {
+                        listview(choices) {
+                            placeholder = label("No choices")
+                            cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number})" }
+                        }
+                    }
+                }
             }
         }
         bottom {
@@ -134,18 +167,42 @@ class DetailStepView : Fragment() {
                 spacing = 10.0
                 button("Save") {
                     enableWhen(step.dirty)
-                    action {
-                        runWithLoading {
-                            controller.commit(step)
-                        }
-                    }
+                    action(::save)
                 }
                 button("Back") {
-                    action{
-                        replaceWith<StepsMasterView>()
-                    }
+                    action(::back)
                 }
             }
         }
+    }
+
+    private fun updateData() {
+        runWithLoading { transaction { step.choices } } ui {
+            choices.clear()
+            choices.addAll(it)
+        }
+    }
+
+    private fun save() {
+        runWithLoading {
+            controller.commit(step)
+        } ui {
+            it.peek {
+                errorAlert { "An error occurred" }
+            }
+        }
+    }
+
+    private fun back() {
+        replaceWith<StepsMasterView>()
+    }
+
+    private fun addChoice() {
+        find<CreateChoiceModal>(CreateChoiceModal::fromStep to step).openModal(block = true)
+        updateData()
+    }
+
+    override fun onDock() {
+        updateData()
     }
 }

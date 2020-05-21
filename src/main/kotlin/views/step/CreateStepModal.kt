@@ -1,10 +1,15 @@
-package views
+package views.step
 
 import controller.StepController
 import javafx.geometry.Pos
 import model.Step
+import onEmpty
+import peek
+import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StepViewModel
+import views.errorAlert
+import views.runWithLoading
 
 class CreateStepModal: Fragment() {
     private val controller: StepController by inject()
@@ -44,8 +49,20 @@ class CreateStepModal: Fragment() {
                 enableWhen(newStep.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    // I don't know why runLater is required...
-                    runWithLoading { controller.createStep(newStep) } ui { runLater { close() } }
+                    runWithLoading {
+                        controller.createStep(newStep)
+                    } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                                    else -> null
+                                }
+                            }
+                        }.onEmpty {
+                            runLater { close() } // I don't know why runLater is required...
+                        }
+                    }
                 }
             }
         }
