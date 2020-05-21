@@ -2,6 +2,7 @@ package controller
 
 import javafx.collections.ObservableList
 import model.Adventure
+import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
 import sqlutils.MaybePSQLError
 import sqlutils.safeTransaction
@@ -30,12 +31,12 @@ class AdventureController : ControllerWithContextAdventure() {
 
     fun deleteAdventure(adventure: AdventureViewModel): MaybePSQLError {
         return adventure.item?.let {
-            if (contextAdventure?.item == it) {
-                contextAdventure = null
-            }
             safeTransaction {
                 it.delete()
-            }
+            }.onEmpty {
+                if (contextAdventure?.item == it) {
+                contextAdventure = null
+            } }
         } ?: MaybePSQLError.empty()
     }
 }
