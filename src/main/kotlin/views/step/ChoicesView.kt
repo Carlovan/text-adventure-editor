@@ -3,12 +3,12 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import ellipses
-import model.Step
 import onEmpty
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
+import viewmodel.StepViewModel
 import views.errorAlert
 import views.runWithLoading
 
@@ -16,7 +16,7 @@ class CreateChoiceModal : Fragment() {
     private val controller: ChoiceController by inject()
     private val stepController: StepController by inject()
     val fromStep: DetailStepViewModel by param()
-    private val nextSteps = observableListOf<Step>()
+    private val nextSteps = observableListOf<StepViewModel>()
     private val newChoice = ChoiceViewModel()
 
     override val root = form {
@@ -27,7 +27,7 @@ class CreateChoiceModal : Fragment() {
             field("Next step") {
                 combobox(property = newChoice.stepTo) {
                     items = nextSteps
-                    cellFormat { text = "[${it.number}] ${it.text.ellipses(30)}" }
+                    cellFormat { text = "[${it.number.value}] ${it.text.value.ellipses(30)}" }
                     required()
                 }
             }
@@ -59,7 +59,7 @@ class CreateChoiceModal : Fragment() {
     override fun onDock() {
         runLater {
             runWithLoading { stepController.steps } ui { steps ->
-                nextSteps.addAll(steps.map { it.item }.sortedBy { it.number })
+                nextSteps.addAll(steps.sortedBy { it.number.value })
             }
         }
     }

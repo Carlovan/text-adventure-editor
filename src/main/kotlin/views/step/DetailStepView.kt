@@ -32,7 +32,7 @@ class DetailStepView : Fragment() {
                     val choiceList = listview(choices) {
                             bindSelected(selectedChoice)
                             placeholder = label("No choices")
-                            cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number})" }
+                            cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number.value})" }
                         }
                     center = choiceList
                     left {
