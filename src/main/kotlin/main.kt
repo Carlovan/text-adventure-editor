@@ -19,6 +19,7 @@ fun main(args: Array<String>) {
             Statistics, StatisticContraints, StatisticsSkills, Enemies, EnemiesStatistics,
             Items, ItemSlots, Loots, LootsItems, PlayerAvailableSlots, EnemiesSteps, StatisticsItems,
             ItemConstraints, ItemSkillActivations, StatisticsPlayerConfigurations)
+
     }
 
     launch<TextAdventureEditorApp>(args)

@@ -80,6 +80,15 @@ class SkillsView : View("Skills") {
                     skillsTable.editModel.rollback()
                 }
             }
+            button("Detail") {
+                maxWidth = Double.MAX_VALUE
+                enableWhen(skillsTable.anySelected)
+                action {
+                    runWithLoading { controller.getDetail(skillsTable.selectedItem!!) } ui {
+                        replaceWith(find<DetailSkillView>(DetailSkillView::skill to it))
+                    }
+                }
+            }
         }
 
         center = skillsTable

@@ -17,15 +17,17 @@ object ItemSlots : AdventureTable("ITEM_SLOT") {
 class ItemSlot(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ItemSlot>(ItemSlots)
 
+    var adventure by ItemSlots.adventure
+
     var name by ItemSlots.name
     var capacity by ItemSlots.capacity
 }
 
 object PlayerAvailableSlots : Table("PLAYER_AVAILABLE_SLOT") {
-    val loot = reference("loot", Loots)
-    val item = reference("item", Items)
+    val playerConf = reference("player_conf", PlayerConfigurations)
+    val itemSlot = reference("item_slot", ItemSlots)
     val name = varchar("name", 32)
-    override val primaryKey = PrimaryKey(loot, item, name)
+    override val primaryKey = PrimaryKey(playerConf, itemSlot, name)
 }
 
 object Items : AdventureTable("ITEM") {
@@ -40,6 +42,8 @@ object Items : AdventureTable("ITEM") {
 
 class Item(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Item>(Items)
+
+    var adventure by Items.adventure
 
     var name by Items.name
     var isConsumable by Items.isConsumable
