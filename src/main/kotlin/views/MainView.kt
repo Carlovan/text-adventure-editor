@@ -1,9 +1,10 @@
 package views
 
 import tornadofx.*
+import views.skill.SkillsView
 import views.statistic.StatisticsView
 
-class MainView: View() {
+class MainView: View("Text adventure editor") {
     override val root = borderpane {
         top = menubar {
             menu("Adventure") {
@@ -18,13 +19,19 @@ class MainView: View() {
                     }
                 }
             }
-            menu("Statistics") {
+            menu("Player") {
                 item("Statistics") {
                     action {
                         center<StatisticsView>()
                     }
                 }
+                item("Skills") {
+                    action {
+                        center<SkillsView>()
+                    }
+                }
             }
+
         }
     }
 

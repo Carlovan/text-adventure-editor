@@ -4,11 +4,10 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.select
 
 object Skills : AdventureTable("SKILL") {
     val name = varchar("name", 32)
-    val isItemSkill = bool("is_item_skill")
-    val isStatSkill = bool("is_stat_skill")
 
     init {
         uniqueIndex(adventure, name)
@@ -18,9 +17,13 @@ object Skills : AdventureTable("SKILL") {
 class Skill(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Skill>(Skills)
 
+    var adventure by Skills.adventure
+
     var name by Skills.name
-    var isItemSkill by Skills.isItemSkill
-    var isStatSkill by Skills.isStatSkill
+    var itemsActivations by Item via ItemSkillActivations
+    var statModifiers by Statistic via StatisticsSkills
+    val isItemSkill get() = itemsActivations.count() > 0
+    val isStatSkill get() = statModifiers.count() > 0
 }
 
 object SkillsPlayerConfigurations : Table("SKILL_PLAYER_CONFIGURATION") {

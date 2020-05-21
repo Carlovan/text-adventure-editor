@@ -89,15 +89,16 @@ class StepsMasterView : View("Steps") {
                 controller.commit(items.asSequence()
                     .filter { it.value.isDirty }
                     .map { it.key })
-                    .peek {
-                        errorAlert {
-                            when (it) {
-                                PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
-                                else -> null
-                            }
-                        }
-                    }.onEmpty { commit() }
             }
+        } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                        else -> null
+                    }
+                }
+            }.onEmpty { stepsTable.editModel.commit() }
         }
     }
 

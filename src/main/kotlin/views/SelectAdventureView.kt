@@ -9,7 +9,7 @@ import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.AdventureViewModel
 
-class SelectAdventureView : View(){
+class SelectAdventureView : View("Select adventure"){
     private val controller: AdventureController by inject()
 
     private val adventures: ObservableList<AdventureViewModel> = emptyList<AdventureViewModel>().toObservable()
@@ -77,7 +77,7 @@ class SelectAdventureView : View(){
                                     rollback()
                                     clearDecorators() // Remove validation
                                 }
-                                goToMainView()
+                                runLater { goToMainView() }
                             }
                         }
                     }
