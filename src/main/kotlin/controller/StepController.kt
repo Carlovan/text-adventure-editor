@@ -3,27 +3,34 @@ package controller
 import javafx.collections.ObservableList
 import model.Step
 import model.Steps
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import sqlutils.safeTransaction
 import tornadofx.asObservable
+import tornadofx.observableListOf
+import viewmodel.DetailStepViewModel
 import viewmodel.StepViewModel
 import viewmodel.fromViewModel
 
 class StepController : ControllerWithContextAdventure() {
-    val steps : ObservableList<StepViewModel> by cachedProperty {
+    var cachedSteps = observableListOf<StepViewModel>()
+        private set
+
+    val steps : ObservableList<StepViewModel> get() =
         transaction {
             Step.find { Steps.adventure eq contextAdventure!!.item.id }
                 .map {
                     StepViewModel(it)
-                }.asObservable()
+                }.asObservable().also { cachedSteps = it }
         }
-    }
 
     fun commit(changes: Sequence<StepViewModel>) =
         safeTransaction {
-            changes.forEach { it.commit() }
+            changes.forEach { it.saveData() }
+        }
+
+    fun commit(change: DetailStepViewModel) =
+        safeTransaction {
+            change.saveData()
         }
 
     fun createStep(step: StepViewModel) {
@@ -33,13 +40,15 @@ class StepController : ControllerWithContextAdventure() {
                 fromViewModel(step)
             }
         }
-        invalidateProperty(::steps)
     }
 
     fun deleteStep(step: StepViewModel) {
         transaction {
             step.item.delete()
         }
-        invalidateProperty(::steps)
+    }
+
+    fun getDetail(master: StepViewModel): DetailStepViewModel {
+        return transaction { DetailStepViewModel(master.item) }
     }
 }

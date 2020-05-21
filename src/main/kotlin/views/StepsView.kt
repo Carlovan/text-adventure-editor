@@ -6,6 +6,7 @@ import onEmpty
 import peek
 import sqlutils.PSQLState
 import tornadofx.*
+import viewmodel.DetailStepViewModel
 import viewmodel.StepViewModel
 
 class StepsMasterView : View("Steps") {
@@ -54,16 +55,21 @@ class StepsMasterView : View("Steps") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(stepsTable.isDirty)
                 action {
-                    with(stepsTable.editModel) {
-                        controller.commit(items
-                            .asSequence()
-                            .filter { it.value.isDirty }
-                            .map { it.key })
-                            .peek {
-                                errorAlert { when(it) {
-                                    PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
-                                    else -> null } }
-                            }.onEmpty { commit() }
+                    runWithLoading {
+                        with(stepsTable.editModel) {
+                            controller.commit(items
+                                .asSequence()
+                                .filter { it.value.isDirty }
+                                .map { it.key })
+                                .peek {
+                                    errorAlert {
+                                        when (it) {
+                                            PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                                            else -> null
+                                        }
+                                    }
+                                }.onEmpty { commit() }
+                        }
                     }
                 }
             }
@@ -72,6 +78,15 @@ class StepsMasterView : View("Steps") {
                 enableWhen(stepsTable.isDirty)
                 action {
                     stepsTable.editModel.rollback()
+                }
+            }
+            separator()
+            button("Details") {
+                enableWhen(stepsTable.anySelected)
+                action {
+                    runWithLoading { controller.getDetail(stepsTable.selectedItem!!) } ui {
+                        this@StepsMasterView.replaceWith(find<DetailStepView>(DetailStepView::step to it))
+                    }
                 }
             }
         }
@@ -89,5 +104,38 @@ class StepsMasterView : View("Steps") {
 
     override fun onDock() {
         updateData()
+    }
+}
+
+class DetailStepView : Fragment() {
+    private val controller: StepController by inject()
+    val step: DetailStepViewModel by param()
+    override val root = borderpane {
+        paddingAll = 20.0
+        center {
+            vbox {
+                spacing = 10.0
+                label("Step number ${step.number.value}")
+                textarea(step.text)
+            }
+        }
+        bottom {
+            hbox {
+                spacing = 10.0
+                button("Save") {
+                    enableWhen(step.dirty)
+                    action {
+                        runWithLoading {
+                            controller.commit(step)
+                        }
+                    }
+                }
+                button("Back") {
+                    action{
+                        replaceWith<StepsMasterView>()
+                    }
+                }
+            }
+        }
     }
 }

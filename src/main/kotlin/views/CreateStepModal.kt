@@ -9,7 +9,7 @@ import viewmodel.StepViewModel
 class CreateStepModal: Fragment() {
     private val controller: StepController by inject()
     private val newStep = StepViewModel()
-    private val existingNumbers = controller.steps.map { it.number.value }.toSortedSet()
+    private val existingNumbers = controller.cachedSteps.map { it.number.value }.toSortedSet()
 
     private fun getMissingNumbers(max: Int = existingNumbers.lastOrNull() ?: 0): Collection<Int> {
         return (Step.MIN_NUMBER until max)
