@@ -36,58 +36,28 @@ class StepsMasterView : View("Steps") {
             paddingAll = 10.0
             button("New") {
                 maxWidth = Double.MAX_VALUE
-                action {
-                    find<CreateStepModal>().openModal(block = true)
-                    updateData()
-                }
+                action(::newStep)
             }
             button("Delete") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen { stepsTable.anySelected }
-                action {
-                    runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
-                        updateData()
-                    }
-                }
+                action(::deleteStep)
             }
             separator()
             button("Save") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(stepsTable.isDirty)
-                action {
-                    runWithLoading {
-                        with(stepsTable.editModel) {
-                            controller.commit(items
-                                .asSequence()
-                                .filter { it.value.isDirty }
-                                .map { it.key })
-                                .peek {
-                                    errorAlert {
-                                        when (it) {
-                                            PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
-                                            else -> null
-                                        }
-                                    }
-                                }.onEmpty { commit() }
-                        }
-                    }
-                }
+                action(::saveTable)
             }
             button("Discard") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(stepsTable.isDirty)
-                action {
-                    stepsTable.editModel.rollback()
-                }
+                action(::discardTable)
             }
             separator()
             button("Details") {
                 enableWhen(stepsTable.anySelected)
-                action {
-                    runWithLoading { controller.getDetail(stepsTable.selectedItem!!) } ui {
-                        this@StepsMasterView.replaceWith(find<DetailStepView>(DetailStepView::step to it))
-                    }
-                }
+                action(::openDetails)
             }
         }
 
@@ -99,6 +69,45 @@ class StepsMasterView : View("Steps") {
             steps.clear()
             steps.addAll(it)
             stepsTable.sort()
+        }
+    }
+
+    private fun newStep() {
+        find<CreateStepModal>().openModal(block = true)
+        updateData()
+    }
+
+    private fun deleteStep() {
+        runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
+            updateData()
+        }
+    }
+
+    private fun saveTable() {
+        runWithLoading {
+            with(stepsTable.editModel) {
+                controller.commit(items.asSequence()
+                    .filter { it.value.isDirty }
+                    .map { it.key })
+                    .peek {
+                        errorAlert {
+                            when (it) {
+                                PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                                else -> null
+                            }
+                        }
+                    }.onEmpty { commit() }
+            }
+        }
+    }
+
+    private fun discardTable() {
+        stepsTable.editModel.rollback()
+    }
+
+    private fun openDetails() {
+        runWithLoading { controller.getDetail(stepsTable.selectedItem!!) } ui {
+            replaceWith(find<DetailStepView>(DetailStepView::step to it))
         }
     }
 
