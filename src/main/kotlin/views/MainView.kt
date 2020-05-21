@@ -1,6 +1,7 @@
 package views
 
 import tornadofx.*
+import views.statistic.StatisticsView
 
 class MainView: View() {
     override val root = borderpane {
@@ -14,6 +15,13 @@ class MainView: View() {
                 item("Steps") {
                     action {
                         center<StepsMasterView>()
+                    }
+                }
+            }
+            menu("Statistics") {
+                item("Statistics") {
+                    action {
+                        center<StatisticsView>()
                     }
                 }
             }

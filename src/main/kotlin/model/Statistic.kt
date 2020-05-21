@@ -16,6 +16,7 @@ object Statistics : AdventureTable("STATISTIC") {
 class Statistic(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Statistic>(Statistics)
 
+    var adventure by Statistics.adventure
     var name by Statistics.name
 }
 

@@ -4,10 +4,11 @@ import javafx.event.EventHandler
 import javafx.scene.control.Alert
 import javafx.scene.layout.Region
 import javafx.stage.Modality
+import tornadofx.UIComponent
 import tornadofx.View
 import tornadofx.runLater
 
-fun View.errorAlert(contentSupplier: () -> String?) {
+fun UIComponent.errorAlert(contentSupplier: () -> String?) {
     Alert(Alert.AlertType.ERROR).apply {
         headerText = "An error occurred"
         contentText = contentSupplier()
