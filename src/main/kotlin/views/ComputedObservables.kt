@@ -4,6 +4,7 @@ import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.ObservableValueBase
 import javafx.scene.control.ComboBox
+import javafx.scene.control.ListView
 import javafx.scene.control.TableView
 import tornadofx.booleanProperty
 import tornadofx.editModel
@@ -46,4 +47,7 @@ val <T> TableView<T>.anySelected: ObservableBooleanValue
 get() = this.selectionModel.selectedItemProperty().isNotNull
 
 val <T> ComboBox<T>.anySelected: ObservableBooleanValue
+get() = this.selectionModel.selectedItemProperty().isNotNull
+
+val <T> ListView<T>.anySelected: ObservableBooleanValue
 get() = this.selectionModel.selectedItemProperty().isNotNull

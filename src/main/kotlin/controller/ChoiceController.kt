@@ -15,4 +15,9 @@ class ChoiceController: ControllerWithContextAdventure() {
                 fromViewModel(choice)
             }
         }
+
+    fun deleteChoice(choice: ChoiceViewModel) =
+        safeTransaction {
+            choice.item.delete()
+        }
 }

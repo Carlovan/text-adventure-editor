@@ -1,6 +1,8 @@
 package views.step
 
+import controller.ChoiceController
 import controller.StepController
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.TableView
 import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -14,7 +16,6 @@ import views.anySelected
 import views.errorAlert
 import views.isDirty
 import views.runWithLoading
-import views.step.CreateStepModal
 
 class StepsMasterView : View("Steps") {
     private val controller: StepController by inject()
@@ -62,7 +63,8 @@ class StepsMasterView : View("Steps") {
                 action(::discardTable)
             }
             separator()
-            button("Details") {
+            button("Detail") {
+                maxWidth = Double.MAX_VALUE
                 enableWhen(stepsTable.anySelected)
                 action(::openDetails)
             }
@@ -135,8 +137,11 @@ class StepsMasterView : View("Steps") {
 
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
+    private val choiceController: ChoiceController by inject()
+
     val step: DetailStepViewModel by param()
-    val choices = observableListOf<ChoiceViewModel>()
+    private val choices = observableListOf<ChoiceViewModel>()
+    private val selectedChoice = SimpleObjectProperty<ChoiceViewModel>()
 
     override val root = borderpane {
         paddingAll = 20.0
@@ -147,16 +152,23 @@ class DetailStepView : Fragment() {
                 textarea(step.text)
                 label("Choices:")
                 borderpane {
-                    left {
-                        paddingRight = 10.0
-                        button("Add") {
-                            action(::addChoice)
-                        }
-                    }
-                    center {
-                        listview(choices) {
+                    val choiceList = listview(choices) {
+                            bindSelected(selectedChoice)
                             placeholder = label("No choices")
                             cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number})" }
+                        }
+                    center = choiceList
+                    left {
+                        vbox {
+                            paddingRight = 10.0
+                            spacing = 10.0
+                            button("Add") {
+                                action(::addChoice)
+                            }
+                            button("Delete") {
+                                enableWhen(choiceList.anySelected)
+                                action(::deleteChoice)
+                            }
                         }
                     }
                 }
@@ -200,6 +212,15 @@ class DetailStepView : Fragment() {
     private fun addChoice() {
         find<CreateChoiceModal>(CreateChoiceModal::fromStep to step).openModal(block = true)
         updateData()
+    }
+
+    private fun deleteChoice() {
+        runWithLoading { choiceController.deleteChoice(selectedChoice.value) } ui {
+            it.peek {
+                errorAlert { "Cannot delete choice" }
+            }
+            updateData()
+        }
     }
 
     override fun onDock() {

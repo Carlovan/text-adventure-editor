@@ -57,8 +57,10 @@ class CreateChoiceModal : Fragment() {
     }
 
     override fun onDock() {
-        runWithLoading { stepController.steps } ui {steps ->
-            nextSteps.addAll(steps.map { it.item }.sortedBy { it.number })
+        runLater {
+            runWithLoading { stepController.steps } ui { steps ->
+                nextSteps.addAll(steps.map { it.item }.sortedBy { it.number })
+            }
         }
     }
 }
