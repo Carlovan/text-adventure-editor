@@ -60,25 +60,24 @@ class SelectAdventureView : View(){
                 button("Create") {
                     enableWhen(newAdventure.valid)
                     action {
-                        newAdventure.commit {
-                            runWithLoading {
-                                controller.createAdventure(newAdventure, true)
-                                    .peek {
-                                        errorAlert {
-                                            when (it) {
-                                                PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
-                                                else -> null
-                                            }
-                                        }
+                        runWithLoading {
+                            controller.createAdventure(newAdventure, true)
+                        } ui {
+                            it.peek {
+                                errorAlert {
+                                    when (it) {
+                                        PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
+                                        else -> null
                                     }
-                                    .onEmpty {
-                                        with(newAdventure) {
-                                            item = null
-                                            rollback()
-                                            clearDecorators() // Remove validation
-                                        }
-                                        goToMainView()
-                                    }
+                                }
+                            }
+                            .onEmpty {
+                                with(newAdventure) {
+                                    item = null
+                                    rollback()
+                                    clearDecorators() // Remove validation
+                                }
+                                goToMainView()
                             }
                         }
                     }
