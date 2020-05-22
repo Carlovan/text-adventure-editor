@@ -8,7 +8,7 @@ import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
 import views.anySelected
 import views.isDirty
-import views.runWithLoading
+import views.runWithLoadingAsync
 
 class DetailSkillView : Fragment() {
     private val controller: SkillController by inject()
@@ -33,7 +33,10 @@ class DetailSkillView : Fragment() {
                                 enableDirtyTracking()
 
                                 column("Item", ItemSkillActivationViewModel::itemName)
-                                column("Quantity required", ItemSkillActivationViewModel::quantityRequired).makeEditable()
+                                column(
+                                    "Quantity required",
+                                    ItemSkillActivationViewModel::quantityRequired
+                                ).makeEditable()
 
                                 smartResize()
                             }
@@ -43,7 +46,9 @@ class DetailSkillView : Fragment() {
                                 button("New") {
                                     maxWidth = Double.MAX_VALUE
                                     action {
-                                        find<CreateItemSkillActivationModal>(CreateItemSkillActivationModal::skill to skill).openModal(block = true)
+                                        find<CreateItemSkillActivationModal>(CreateItemSkillActivationModal::skill to skill).openModal(
+                                            block = true
+                                        )
                                         updateData()
                                     }
                                 }
@@ -79,9 +84,9 @@ class DetailSkillView : Fragment() {
     }
 
     private fun updateData() {
-        runWithLoading { transaction { skill.itemSkillActivations } } ui {
+        runWithLoadingAsync {
             itemSkillActivations.clear()
-            itemSkillActivations.addAll(it)
+            itemSkillActivations.addAll(transaction { skill.itemSkillActivations })
         }
     }
 //

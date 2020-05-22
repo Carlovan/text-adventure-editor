@@ -9,7 +9,11 @@ typealias MaybePSQLError = Optional<PSQLState>
 
 fun safeTransaction(statement: Transaction.() -> Unit): MaybePSQLError {
     try {
-        transaction(statement = statement)
+        println("SafeTransaction in ${Thread.currentThread().name}")
+        transaction {
+            println("transaction in ${Thread.currentThread().name}")
+            statement()
+        }
     } catch (exception: ExposedSQLException) {
         return Optional.of(exception.toPSQLState())
     }

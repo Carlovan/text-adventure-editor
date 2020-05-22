@@ -14,7 +14,7 @@ import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
 import viewmodel.ItemViewModel
 import views.errorAlert
-import views.runWithLoading
+import views.runWithLoadingAsync
 
 class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     private val controller: SkillController by inject()
@@ -47,12 +47,15 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
                 enableWhen(newItemSkillActivation.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoading { controller.createItemSkillActivation(newItemSkillActivation) } ui {
-                        it.peek {
-                            errorAlert { when(it) {
-                                PSQLState.UNIQUE_VIOLATION -> "Another item is associated with this skill!"
-                                PSQLState.FOREIGN_KEY_VIOLATION -> "Another item is associated with this skill!"
-                                else -> null }
+                    runWithLoadingAsync {
+                        controller.createItemSkillActivation(newItemSkillActivation)
+                        .peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Another item is associated with this skill!"
+                                    PSQLState.FOREIGN_KEY_VIOLATION -> "Another item is associated with this skill!"
+                                    else -> null
+                                }
                             }
                         }.onEmpty { runLater { close() } }
                     }
@@ -62,9 +65,9 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     }
 
     override fun onDock() {
-        runWithLoading { itemController.items } ui { items ->
+        runWithLoadingAsync {
             itemViewModels.clear()
-            itemViewModels.addAll(items)
+            itemViewModels.addAll(itemController.items)
         }
     }
 }

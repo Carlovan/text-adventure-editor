@@ -10,7 +10,7 @@ import viewmodel.StatisticViewModel
 import views.anySelected
 import views.errorAlert
 import views.isDirty
-import views.runWithLoading
+import views.runWithLoadingAsync
 
 class StatisticsView : View("Statistics") {
     private val controller: StatisticController by inject()
@@ -43,11 +43,16 @@ class StatisticsView : View("Statistics") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen { statsTable.anySelected }
                 action {
-                    runWithLoading { controller.deleteStatistic(statsTable.selectionModel.selectedItem) } ui {
-                        it.peek {errorAlert { when(it) {
-                            PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Statistic, it is related to other entities"
-                            else -> null
-                        } } }.onEmpty { updateData() }
+                    runWithLoadingAsync {
+                        controller.deleteStatistic(statsTable.selectionModel.selectedItem)
+                            .peek {
+                                errorAlert {
+                                    when (it) {
+                                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Statistic, it is related to other entities"
+                                        else -> null
+                                    }
+                                }
+                            }.onEmpty { updateData() }
                     }
                 }
             }
@@ -56,19 +61,21 @@ class StatisticsView : View("Statistics") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(statsTable.isDirty)
                 action {
-                    runWithLoading {
+                    runWithLoadingAsync {
                         with(statsTable.editModel) {
                             controller.commit(items
                                 .asSequence()
                                 .filter { it.value.isDirty }
                                 .map { it.key })
                         }
-                    } ui {
-                        it.peek {
-                        errorAlert { when(it) {
-                            PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
-                            else -> null } }
-                        }.onEmpty { statsTable.editModel.commit() }
+                            .peek {
+                                errorAlert {
+                                    when (it) {
+                                        PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
+                                        else -> null
+                                    }
+                                }
+                            }.onEmpty { statsTable.editModel.commit() }
                     }
                 }
             }
@@ -85,9 +92,9 @@ class StatisticsView : View("Statistics") {
     }
 
     private fun updateData() {
-        runWithLoading { controller.statistics } ui {
+        runWithLoadingAsync {
             stats.clear()
-            stats.addAll(it)
+            stats.addAll(controller.statistics)
             statsTable.sort()
         }
     }

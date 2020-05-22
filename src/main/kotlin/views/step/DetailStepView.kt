@@ -3,14 +3,14 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
 import views.anySelected
 import views.errorAlert
-import views.runWithLoading
+import views.runWithLoadingAsync
 
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
@@ -73,19 +73,18 @@ class DetailStepView : Fragment() {
     }
 
     private fun updateData() {
-        runWithLoading { transaction { step.choices } } ui {
+        runWithLoadingAsync {
             choices.clear()
-            choices.addAll(it)
+            choices.addAll(newSuspendedTransaction { step.choices })
         }
     }
 
     private fun save() {
-        runWithLoading {
+        runWithLoadingAsync {
             controller.commit(step)
-        } ui {
-            it.peek {
-                errorAlert { "An error occurred" }
-            }
+                .peek {
+                    errorAlert { "An error occurred" }
+                }
         }
     }
 
@@ -99,16 +98,17 @@ class DetailStepView : Fragment() {
     }
 
     private fun deleteChoice() {
-        runWithLoading { choiceController.deleteChoice(selectedChoice.value) } ui {
-            it.peek {
-                errorAlert { "Cannot delete choice" }
-            }
+        runWithLoadingAsync {
+            choiceController.deleteChoice(selectedChoice.value)
+                .peek {
+                    errorAlert { "Cannot delete choice" }
+                }
             updateData()
         }
     }
 
     private fun openDetail() {
-
+        TODO()
     }
 
     override fun onDock() {

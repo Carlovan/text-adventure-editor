@@ -41,11 +41,16 @@ class SelectAdventureView : View("Select adventure"){
                         enableWhen { adventureCombo.anySelected }
                         action {
                             adventureCombo.selectedItem?.let {
-                                runWithLoading { controller.deleteAdventure(it) } ui {
-                                    it.peek {errorAlert { when(it) {
-                                            PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Adventure, it is related to other entities"
-                                            else -> null
-                                        } } }
+                                runWithLoadingAsync {
+                                    controller.deleteAdventure(it)
+                                        .peek {
+                                            errorAlert {
+                                                when (it) {
+                                                    PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Adventure, it is related to other entities"
+                                                    else -> null
+                                                }
+                                            }
+                                        }
                                         .onEmpty { updateData() }
                                 }
                             }
@@ -60,25 +65,24 @@ class SelectAdventureView : View("Select adventure"){
                 button("Create") {
                     enableWhen(newAdventure.valid)
                     action {
-                        runWithLoading {
+                        runWithLoadingAsync {
                             controller.createAdventure(newAdventure, true)
-                        } ui {
-                            it.peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
-                                        else -> null
+                                .peek {
+                                    errorAlert {
+                                        when (it) {
+                                            PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
+                                            else -> null
+                                        }
                                     }
                                 }
-                            }
-                            .onEmpty {
-                                with(newAdventure) {
-                                    item = null
-                                    rollback()
-                                    clearDecorators() // Remove validation
+                                .onEmpty {
+                                    with(newAdventure) {
+                                        item = null
+                                        rollback()
+                                        clearDecorators() // Remove validation
+                                    }
+                                    runLater { goToMainView() }
                                 }
-                                runLater { goToMainView() }
-                            }
                         }
                     }
                 }
@@ -91,10 +95,10 @@ class SelectAdventureView : View("Select adventure"){
     }
 
     private fun updateData() {
-        runWithLoading { controller.adventures } ui {
+        runWithLoadingAsync {
             with(adventures) {
                 clear()
-                addAll(it)
+                addAll(controller.adventures)
             }
             adventureCombo.valueProperty().set(controller.contextAdventure)
         }

@@ -10,7 +10,7 @@ import viewmodel.SkillViewModel
 import views.anySelected
 import views.errorAlert
 import views.isDirty
-import views.runWithLoading
+import views.runWithLoadingAsync
 
 class SkillsView : View("Skills") {
     private val controller: SkillController by inject()
@@ -44,11 +44,16 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen { skillsTable.anySelected }
                 action {
-                    runWithLoading { controller.deleteSkill(skillsTable.selectionModel.selectedItem) } ui {
-                        it.peek {errorAlert { when(it) {
-                            PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Skill, it is related to other entities"
-                            else -> null
-                        } } }.onEmpty { updateData() }
+                    runWithLoadingAsync {
+                        controller.deleteSkill(skillsTable.selectionModel.selectedItem)
+                            .peek {
+                                errorAlert {
+                                    when (it) {
+                                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Skill, it is related to other entities"
+                                        else -> null
+                                    }
+                                }
+                            }.onEmpty { updateData() }
                     }
                 }
             }
@@ -57,19 +62,21 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(skillsTable.isDirty)
                 action {
-                    runWithLoading {
+                    runWithLoadingAsync {
                         with(skillsTable.editModel) {
                             controller.commit(items
                                 .asSequence()
                                 .filter { it.value.isDirty }
                                 .map { it.key })
                         }
-                    } ui {
-                        it.peek {
-                            errorAlert { when(it) {
-                                PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
-                                else -> null } }
-                        }.onEmpty { skillsTable.editModel.commit() }
+                            .peek {
+                                errorAlert {
+                                    when (it) {
+                                        PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
+                                        else -> null
+                                    }
+                                }
+                            }.onEmpty { skillsTable.editModel.commit() }
                     }
                 }
             }
@@ -84,8 +91,8 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(skillsTable.anySelected)
                 action {
-                    runWithLoading { controller.getDetail(skillsTable.selectedItem!!) } ui {
-                        replaceWith(find<DetailSkillView>(DetailSkillView::skill to it))
+                    runWithLoadingAsync {
+                        replaceWith(find<DetailSkillView>(DetailSkillView::skill to controller.getDetail(skillsTable.selectedItem!!)))
                     }
                 }
             }
@@ -95,9 +102,9 @@ class SkillsView : View("Skills") {
     }
 
     private fun updateData() {
-        runWithLoading { controller.skills } ui {
+        runWithLoadingAsync {
             skills.clear()
-            skills.addAll(it)
+            skills.addAll(controller.skills)
             skillsTable.sort()
         }
     }
