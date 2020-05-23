@@ -7,4 +7,9 @@ class TextAdventureEditorApp: App(SelectAdventureView::class) {
         stage.isMaximized = true
         super.start(stage)
     }
+
+    override fun stop() {
+        ExposedExecutor.shutdown()
+        super.stop()
+    }
 }
