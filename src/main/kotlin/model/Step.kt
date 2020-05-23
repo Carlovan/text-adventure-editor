@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 object Steps : AdventureTable("STEP") {
-    val number = integer("number")
+    val number = integer("number").check { it greaterEq Step.MIN_NUMBER }
     val text = text("text")
     val loot = reference("loot", Loots).nullable()
 
