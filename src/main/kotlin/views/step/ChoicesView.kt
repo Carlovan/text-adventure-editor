@@ -10,7 +10,8 @@ import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
 import viewmodel.StepViewModel
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
 class CreateChoiceModal : Fragment() {
     private val controller: ChoiceController by inject()
@@ -47,18 +48,17 @@ class CreateChoiceModal : Fragment() {
     }
 
     private fun save() {
-        runWithLoadingAsync {
-            controller.createChoice(newChoice, fromStep)
-                .peek {
-                    errorAlert { "Cannot create the choice" }
-                }.onEmpty { runLater { close() } }
+        runWithLoading { controller.createChoice(newChoice, fromStep) } ui {
+            it.peek {
+                errorAlert { "Cannot create the choice" }
+            }.onEmpty { runLater { close() } }
         }
     }
 
     override fun onDock() {
         runLater {
-            runWithLoadingAsync {
-                nextSteps.addAll(stepController.steps.sortedBy { it.number.value })
+            runWithLoading { stepController.steps } ui {
+                nextSteps.addAll(it.sortedBy { step -> step.number.value })
             }
         }
     }

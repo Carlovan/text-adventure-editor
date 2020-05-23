@@ -41,9 +41,8 @@ class SelectAdventureView : View("Select adventure"){
                         enableWhen { adventureCombo.anySelected }
                         action {
                             adventureCombo.selectedItem?.let {
-                                runWithLoadingAsync {
-                                    controller.deleteAdventure(it)
-                                        .peek {
+                                runWithLoading { controller.deleteAdventure(it) } ui {
+                                        it.peek {
                                             errorAlert {
                                                 when (it) {
                                                     PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Adventure, it is related to other entities"
@@ -65,9 +64,9 @@ class SelectAdventureView : View("Select adventure"){
                 button("Create") {
                     enableWhen(newAdventure.valid)
                     action {
-                        runWithLoadingAsync {
-                            controller.createAdventure(newAdventure, true)
-                                .peek {
+                        runWithLoading { controller.createAdventure(newAdventure, true) } ui {
+                            println("Create adventure in ${Thread.currentThread().name}")
+                                it.peek {
                                     errorAlert {
                                         when (it) {
                                             PSQLState.UNIQUE_VIOLATION -> "An adventure with this name already exists"
@@ -95,10 +94,10 @@ class SelectAdventureView : View("Select adventure"){
     }
 
     private fun updateData() {
-        runWithLoadingAsync {
+        runWithLoading { controller.adventures } ui {
             with(adventures) {
                 clear()
-                addAll(controller.adventures)
+                addAll(it)
             }
             adventureCombo.valueProperty().set(controller.contextAdventure)
         }

@@ -9,9 +9,10 @@ import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StepViewModel
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
-class CreateStepModal: Fragment() {
+class CreateStepModal : Fragment() {
     private val controller: StepController by inject()
     private val newStep = StepViewModel()
     private val existingNumbers = controller.cachedSteps.map { it.number.value }.toSortedSet()
@@ -49,18 +50,17 @@ class CreateStepModal: Fragment() {
                 enableWhen(newStep.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoadingAsync {
-                        controller.createStep(newStep)
-                            .peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
-                                        else -> null
-                                    }
+                    runWithLoading { controller.createStep(newStep) } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                                    else -> null
                                 }
-                            }.onEmpty {
-                                runLater { close() } // I don't know why runLater is required...
                             }
+                        }.onEmpty {
+                            runLater { close() } // I don't know why runLater is required...
+                        }
                     }
                 }
             }

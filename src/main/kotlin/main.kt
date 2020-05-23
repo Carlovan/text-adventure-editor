@@ -6,9 +6,10 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import tornadofx.launch
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-val ExposedScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+val ExposedExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
 fun main(args: Array<String>) {
     ExposedScope.launch {

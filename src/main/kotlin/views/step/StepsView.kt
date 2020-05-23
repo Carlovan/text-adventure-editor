@@ -7,10 +7,7 @@ import peek
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StepViewModel
-import views.anySelected
-import views.errorAlert
-import views.isDirty
-import views.runWithLoadingAsync
+import views.*
 
 class StepsMasterView : View("Steps") {
     private val controller: StepController by inject()
@@ -69,9 +66,9 @@ class StepsMasterView : View("Steps") {
     }
 
     private fun updateData() {
-        runWithLoadingAsync {
+        runWithLoading { controller.steps } ui {
             steps.clear()
-            steps.addAll(controller.steps)
+            steps.addAll(it)
             stepsTable.sort()
         }
     }
@@ -82,36 +79,36 @@ class StepsMasterView : View("Steps") {
     }
 
     private fun deleteStep() {
-        runWithLoadingAsync {
-            controller.deleteStep(stepsTable.selectionModel.selectedItem)
-                .peek {
-                    errorAlert {
-                        when (it) {
-                            PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this step, it is related to other entities"
-                            else -> null
-                        }
+        runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this step, it is related to other entities"
+                        else -> null
                     }
-                }.onEmpty {
-                    updateData()
                 }
+            }.onEmpty {
+                updateData()
+            }
         }
     }
 
     private fun saveTable() {
-        runWithLoadingAsync {
+        runWithLoading {
             with(stepsTable.editModel) {
                 controller.commit(items.asSequence()
                     .filter { it.value.isDirty }
                     .map { it.key })
             }
-                .peek {
-                    errorAlert {
-                        when (it) {
-                            PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
-                            else -> null
-                        }
+        } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "Step number is not unique!"
+                        else -> null
                     }
-                }.onEmpty { stepsTable.editModel.commit() }
+                }
+            }.onEmpty { stepsTable.editModel.commit() }
         }
     }
 
@@ -120,8 +117,8 @@ class StepsMasterView : View("Steps") {
     }
 
     private fun openDetails() {
-        runWithLoadingAsync {
-            replaceWith(find<DetailStepView>(DetailStepView::step to controller.getDetail(stepsTable.selectedItem!!)))
+        runWithLoading { controller.getDetail(stepsTable.selectedItem!!) } ui {
+            replaceWith(find<DetailStepView>(DetailStepView::step to it))
         }
     }
 

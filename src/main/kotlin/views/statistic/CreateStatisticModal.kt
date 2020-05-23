@@ -8,9 +8,10 @@ import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StatisticViewModel
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
-class CreateStatisticModal: Fragment("Create statistic") {
+class CreateStatisticModal : Fragment("Create statistic") {
     private val controller: StatisticController by inject()
     private val newStat = StatisticViewModel()
 
@@ -25,16 +26,15 @@ class CreateStatisticModal: Fragment("Create statistic") {
                 enableWhen(newStat.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoadingAsync {
-                        controller.createStatistic(newStat)
-                            .peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
-                                        else -> null
-                                    }
+                    runWithLoading { controller.createStatistic(newStat) } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
+                                    else -> null
                                 }
-                            }.onEmpty { runLater { close() } }
+                            }
+                        }.onEmpty { runLater { close() } }
                     }
                 }
             }

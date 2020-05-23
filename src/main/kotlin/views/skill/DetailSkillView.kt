@@ -8,7 +8,8 @@ import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
 import views.anySelected
 import views.isDirty
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
 class DetailSkillView : Fragment() {
     private val controller: SkillController by inject()
@@ -84,9 +85,9 @@ class DetailSkillView : Fragment() {
     }
 
     private fun updateData() {
-        runWithLoadingAsync {
+        runWithLoading { transaction { skill.itemSkillActivations } } ui {
             itemSkillActivations.clear()
-            itemSkillActivations.addAll(transaction { skill.itemSkillActivations })
+            itemSkillActivations.addAll(it)
         }
     }
 //

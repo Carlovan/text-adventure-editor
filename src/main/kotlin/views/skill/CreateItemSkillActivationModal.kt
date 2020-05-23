@@ -14,7 +14,8 @@ import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
 import viewmodel.ItemViewModel
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
 class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     private val controller: SkillController by inject()
@@ -47,9 +48,8 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
                 enableWhen(newItemSkillActivation.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoadingAsync {
-                        controller.createItemSkillActivation(newItemSkillActivation)
-                        .peek {
+                    runWithLoading { controller.createItemSkillActivation(newItemSkillActivation) } ui {
+                        it.peek {
                             errorAlert {
                                 when (it) {
                                     PSQLState.UNIQUE_VIOLATION -> "Another item is associated with this skill!"
@@ -65,9 +65,9 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     }
 
     override fun onDock() {
-        runWithLoadingAsync {
+        runWithLoading { itemController.items } ui {
             itemViewModels.clear()
-            itemViewModels.addAll(itemController.items)
+            itemViewModels.addAll(it)
         }
     }
 }

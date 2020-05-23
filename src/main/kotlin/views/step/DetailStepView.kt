@@ -3,14 +3,15 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
 import views.anySelected
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
@@ -30,10 +31,10 @@ class DetailStepView : Fragment() {
                 label("Choices:")
                 borderpane {
                     val choiceList = listview(choices) {
-                            bindSelected(selectedChoice)
-                            placeholder = label("No choices")
-                            cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number.value})" }
-                        }
+                        bindSelected(selectedChoice)
+                        placeholder = label("No choices")
+                        cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number.value})" }
+                    }
                     center = choiceList
                     left {
                         vbox {
@@ -73,18 +74,17 @@ class DetailStepView : Fragment() {
     }
 
     private fun updateData() {
-        runWithLoadingAsync {
+        runWithLoading { transaction { step.choices } } ui {
             choices.clear()
-            choices.addAll(newSuspendedTransaction { step.choices })
+            choices.addAll(it)
         }
     }
 
     private fun save() {
-        runWithLoadingAsync {
-            controller.commit(step)
-                .peek {
-                    errorAlert { "An error occurred" }
-                }
+        runWithLoading { controller.commit(step) } ui {
+            it.peek {
+                errorAlert { "An error occurred" }
+            }
         }
     }
 
@@ -98,11 +98,10 @@ class DetailStepView : Fragment() {
     }
 
     private fun deleteChoice() {
-        runWithLoadingAsync {
-            choiceController.deleteChoice(selectedChoice.value)
-                .peek {
-                    errorAlert { "Cannot delete choice" }
-                }
+        runWithLoading { choiceController.deleteChoice(selectedChoice.value) } ui {
+            it.peek {
+                errorAlert { "Cannot delete choice" }
+            }
             updateData()
         }
     }

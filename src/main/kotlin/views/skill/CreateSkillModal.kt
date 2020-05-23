@@ -8,9 +8,10 @@ import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.SkillViewModel
 import views.errorAlert
-import views.runWithLoadingAsync
+import views.runWithLoading
+import views.ui
 
-class CreateSkillModal: Fragment("Create skill") {
+class CreateSkillModal : Fragment("Create skill") {
     private val controller: SkillController by inject()
     private val newSkill = SkillViewModel()
 
@@ -25,16 +26,15 @@ class CreateSkillModal: Fragment("Create skill") {
                 enableWhen(newSkill.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoadingAsync {
-                        controller.createSkill(newSkill)
-                            .peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
-                                        else -> null
-                                    }
+                    runWithLoading { controller.createSkill(newSkill) } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
+                                    else -> null
                                 }
-                            }.onEmpty { runLater { close() } }
+                            }
+                        }.onEmpty { runLater { close() } }
                     }
                 }
             }

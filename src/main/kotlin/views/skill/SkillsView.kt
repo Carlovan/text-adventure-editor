@@ -7,10 +7,7 @@ import peek
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.SkillViewModel
-import views.anySelected
-import views.errorAlert
-import views.isDirty
-import views.runWithLoadingAsync
+import views.*
 
 class SkillsView : View("Skills") {
     private val controller: SkillController by inject()
@@ -44,16 +41,15 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen { skillsTable.anySelected }
                 action {
-                    runWithLoadingAsync {
-                        controller.deleteSkill(skillsTable.selectionModel.selectedItem)
-                            .peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Skill, it is related to other entities"
-                                        else -> null
-                                    }
+                    runWithLoading { controller.deleteSkill(skillsTable.selectionModel.selectedItem) } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Skill, it is related to other entities"
+                                    else -> null
                                 }
-                            }.onEmpty { updateData() }
+                            }
+                        }.onEmpty { updateData() }
                     }
                 }
             }
@@ -62,21 +58,22 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(skillsTable.isDirty)
                 action {
-                    runWithLoadingAsync {
+                    runWithLoading {
                         with(skillsTable.editModel) {
                             controller.commit(items
                                 .asSequence()
                                 .filter { it.value.isDirty }
                                 .map { it.key })
                         }
-                            .peek {
-                                errorAlert {
-                                    when (it) {
-                                        PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
-                                        else -> null
-                                    }
+                    } ui {
+                        it.peek {
+                            errorAlert {
+                                when (it) {
+                                    PSQLState.UNIQUE_VIOLATION -> "Skill name is not unique!"
+                                    else -> null
                                 }
-                            }.onEmpty { skillsTable.editModel.commit() }
+                            }
+                        }.onEmpty { skillsTable.editModel.commit() }
                     }
                 }
             }
@@ -91,8 +88,8 @@ class SkillsView : View("Skills") {
                 maxWidth = Double.MAX_VALUE
                 enableWhen(skillsTable.anySelected)
                 action {
-                    runWithLoadingAsync {
-                        replaceWith(find<DetailSkillView>(DetailSkillView::skill to controller.getDetail(skillsTable.selectedItem!!)))
+                    runWithLoading { controller.getDetail(skillsTable.selectedItem!!) } ui {
+                        replaceWith(find<DetailSkillView>(DetailSkillView::skill to it))
                     }
                 }
             }
@@ -102,9 +99,9 @@ class SkillsView : View("Skills") {
     }
 
     private fun updateData() {
-        runWithLoadingAsync {
+        runWithLoading { controller.skills } ui {
             skills.clear()
-            skills.addAll(controller.skills)
+            skills.addAll(it)
             skillsTable.sort()
         }
     }
