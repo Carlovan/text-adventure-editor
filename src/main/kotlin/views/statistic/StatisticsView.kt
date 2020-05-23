@@ -7,16 +7,20 @@ import peek
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.StatisticViewModel
-import views.*
+import views.MasterView
+import views.errorAlert
+import views.runWithLoading
+import views.ui
 
-class StatisticsView : View("Statistics") {
+class StatisticsView : MasterView<StatisticViewModel>("Statistics") {
     private val controller: StatisticController by inject()
 
-    var statsTable: TableView<StatisticViewModel> by singleAssign()
     var stats = observableListOf<StatisticViewModel>()
 
-    override val root = borderpane {
-        statsTable = tableview {
+    override val root = createRoot(false)
+
+    override fun createDataTable(): TableView<StatisticViewModel> =
+        tableview {
             items = stats
 
             enableCellEditing()
@@ -26,73 +30,49 @@ class StatisticsView : View("Statistics") {
             smartResize()
         }
 
-        left = vbox {
-            spacing = 10.0
-            paddingAll = 10.0
-            button("New") {
-                maxWidth = Double.MAX_VALUE
-                action {
-                    find<CreateStatisticModal>().openModal(block = true)
-                    updateData()
-                }
-            }
-            button("Delete") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen { statsTable.anySelected }
-                action {
-                    runWithLoading { controller.deleteStatistic(statsTable.selectionModel.selectedItem) } ui {
-                        it.peek {
-                            errorAlert {
-                                when (it) {
-                                    PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Statistic, it is related to other entities"
-                                    else -> null
-                                }
-                            }
-                        }.onEmpty { updateData() }
-                    }
-                }
-            }
-            separator()
-            button("Save") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen(statsTable.isDirty)
-                action {
-                    runWithLoading {
-                        with(statsTable.editModel) {
-                            controller.commit(items
-                                .asSequence()
-                                .filter { it.value.isDirty }
-                                .map { it.key })
-                        }
-                    } ui {
-                        it.peek {
-                            errorAlert {
-                                when (it) {
-                                    PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
-                                    else -> null
-                                }
-                            }
-                        }.onEmpty { statsTable.editModel.commit() }
-                    }
-                }
-            }
-            button("Discard") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen(statsTable.isDirty)
-                action {
-                    statsTable.editModel.rollback()
-                }
-            }
-        }
-
-        center = statsTable
-    }
-
     private fun updateData() {
         runWithLoading { controller.statistics } ui {
             stats.clear()
             stats.addAll(it)
-            statsTable.sort()
+            dataTable.sort()
+        }
+    }
+
+    override fun newItem() {
+        find<CreateStatisticModal>().openModal(block = true)
+        updateData()
+    }
+
+    override fun deleteItem() {
+        runWithLoading { controller.deleteStatistic(dataTable.selectionModel.selectedItem) } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this Statistic, it is related to other entities"
+                        else -> null
+                    }
+                }
+            }.onEmpty { updateData() }
+        }
+    }
+
+    override fun saveTable() {
+        runWithLoading {
+            with(dataTable.editModel) {
+                controller.commit(items
+                    .asSequence()
+                    .filter { it.value.isDirty }
+                    .map { it.key })
+            }
+        } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "Statistic name is not unique!"
+                        else -> null
+                    }
+                }
+            }.onEmpty { dataTable.editModel.commit() }
         }
     }
 

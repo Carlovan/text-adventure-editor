@@ -9,14 +9,15 @@ import tornadofx.*
 import viewmodel.StepViewModel
 import views.*
 
-class StepsMasterView : View("Steps") {
+class StepsMasterView : MasterView<StepViewModel>("Steps") {
     private val controller: StepController by inject()
 
-    var stepsTable: TableView<StepViewModel> by singleAssign()
     var steps = observableListOf<StepViewModel>()
 
-    override val root = borderpane {
-        stepsTable = tableview {
+    override val root = createRoot()
+
+    override fun createDataTable(): TableView<StepViewModel> =
+        tableview {
             items = steps
 
             enableCellEditing()
@@ -31,55 +32,22 @@ class StepsMasterView : View("Steps") {
             smartResize()
         }
 
-        left = vbox {
-            spacing = 10.0
-            paddingAll = 10.0
-            button("New") {
-                maxWidth = Double.MAX_VALUE
-                action(::newStep)
-            }
-            button("Delete") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen { stepsTable.anySelected }
-                action(::deleteStep)
-            }
-            separator()
-            button("Save") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen(stepsTable.isDirty)
-                action(::saveTable)
-            }
-            button("Discard") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen(stepsTable.isDirty)
-                action(::discardTable)
-            }
-            separator()
-            button("Detail") {
-                maxWidth = Double.MAX_VALUE
-                enableWhen(stepsTable.anySelected)
-                action(::openDetails)
-            }
-        }
-
-        center = stepsTable
-    }
 
     private fun updateData() {
         runWithLoading { controller.steps } ui {
             steps.clear()
             steps.addAll(it)
-            stepsTable.sort()
+            dataTable.sort()
         }
     }
 
-    private fun newStep() {
+    override fun newItem() {
         find<CreateStepModal>().openModal(block = true)
         updateData()
     }
 
-    private fun deleteStep() {
-        runWithLoading { controller.deleteStep(stepsTable.selectionModel.selectedItem) } ui {
+    override fun deleteItem() {
+        runWithLoading { controller.deleteStep(dataTable.selectionModel.selectedItem) } ui {
             it.peek {
                 errorAlert {
                     when (it) {
@@ -93,9 +61,9 @@ class StepsMasterView : View("Steps") {
         }
     }
 
-    private fun saveTable() {
+    override fun saveTable() {
         runWithLoading {
-            with(stepsTable.editModel) {
+            with(dataTable.editModel) {
                 controller.commit(items.asSequence()
                     .filter { it.value.isDirty }
                     .map { it.key })
@@ -108,16 +76,12 @@ class StepsMasterView : View("Steps") {
                         else -> null
                     }
                 }
-            }.onEmpty { stepsTable.editModel.commit() }
+            }.onEmpty { dataTable.editModel.commit() }
         }
     }
 
-    private fun discardTable() {
-        stepsTable.editModel.rollback()
-    }
-
-    private fun openDetails() {
-        runWithLoading { controller.getDetail(stepsTable.selectedItem!!) } ui {
+    override fun openDetail() {
+        runWithLoading { controller.getDetail(dataTable.selectedItem!!) } ui {
             replaceWith(find<DetailStepView>(DetailStepView::step to it))
         }
     }
