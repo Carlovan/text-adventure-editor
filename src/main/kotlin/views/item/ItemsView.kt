@@ -65,7 +65,23 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
     }
 
     override fun saveTable() {
-        TODO("not implemented")
+        runWithLoading {
+            with(dataTable.editModel) {
+                controller.commit(items
+                    .asSequence()
+                    .filter { it.value.isDirty }
+                    .map { it.key })
+            }
+        } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "Item name is not unique!"
+                        else -> null
+                    }
+                }
+            }.onEmpty { dataTable.editModel.commit() }
+        }
     }
 
     override fun onDock() {

@@ -30,4 +30,12 @@ class ItemController : ControllerWithContextAdventure() {
         safeTransaction {
             item.item.delete()
         }
+
+    fun commit(changes: Sequence<ItemViewModel>) =
+        safeTransaction {
+            changes.forEach {
+                it.saveData()
+                it.rollback()
+            }
+        }
 }

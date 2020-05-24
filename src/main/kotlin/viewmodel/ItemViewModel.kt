@@ -19,4 +19,9 @@ class ItemViewModel(item: Item? = null) : ItemViewModel<Item>(item) {
     val isConsumable = bind(Item::isConsumable)
 
     val itemSlotViewModel = SimpleObjectProperty(this, "vmp", ItemSlotViewModel(item?.itemSlot))
+
+    fun saveData() {
+        item.name = name.value
+        item.isConsumable = isConsumable.value
+    }
 }
