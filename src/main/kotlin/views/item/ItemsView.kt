@@ -37,7 +37,7 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
             smartResize()
         }
 
-    override val root = createRoot()
+    override val root = createRoot(false)
 
     private fun updateData() {
         runWithLoading { controller.items } ui {
