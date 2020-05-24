@@ -85,4 +85,16 @@ class SkillController : ControllerWithContextAdventure() {
         }
         return MaybePSQLError.empty()
     }
+
+    fun saveItemSkillActivations(changes: Sequence<ItemSkillActivationViewModel>): MaybePSQLError {
+        return changes.map { safeTransaction {
+            it.saveData()
+        } }.firstOrNull { it.isPresent } ?: MaybePSQLError.empty()
+    }
+
+    fun saveStatSkillModifiers(changes: Sequence<StatSkillModifierViewModel>): MaybePSQLError {
+        return changes.map { safeTransaction {
+            it.saveData()
+        } }.firstOrNull { it.isPresent } ?: MaybePSQLError.empty()
+    }
 }

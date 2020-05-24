@@ -5,6 +5,7 @@ import javafx.scene.control.TableView
 import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
+import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
@@ -67,10 +68,27 @@ class DetailSkillView : Fragment() {
                                 button("Save") {
                                     maxWidth = Double.MAX_VALUE
                                     enableWhen(itemSkillActivationsTable.isDirty)
+                                    action {
+                                        with(itemSkillActivationsTable.editModel) {
+                                            controller.saveItemSkillActivations(
+                                                items.asSequence().filter { it.value.isDirty }.map { it.key }
+                                            ).peek {
+                                                errorAlert {
+                                                    when(it) {
+                                                        PSQLState.CHECK_VIOLATION -> "Quantity required must be a positive number!"
+                                                        else -> null
+                                                    }
+                                                }
+                                            }.onEmpty { commit() }
+                                        }
+                                    }
                                 }
                                 button("Discard") {
                                     maxWidth = Double.MAX_VALUE
                                     enableWhen(itemSkillActivationsTable.isDirty)
+                                    action {
+                                        itemSkillActivationsTable.editModel.rollback()
+                                    }
                                 }
                             }
                             center = itemSkillActivationsTable
@@ -116,10 +134,23 @@ class DetailSkillView : Fragment() {
                                 button("Save") {
                                     maxWidth = Double.MAX_VALUE
                                     enableWhen(statSkillModifiersTable.isDirty)
+                                    action {
+                                        with(statSkillModifiersTable.editModel) {
+                                            controller.saveStatSkillModifiers(
+                                                items.asSequence().filter { it.value.isDirty }.map { it.key }
+                                            ).peek {
+                                                errorAlert { null }
+                                            }.onEmpty { commit() }
+                                        }
+                                    }
+
                                 }
                                 button("Discard") {
                                     maxWidth = Double.MAX_VALUE
                                     enableWhen(statSkillModifiersTable.isDirty)
+                                    action {
+                                        statSkillModifiersTable.editModel.rollback()
+                                    }
                                 }
                             }
                             center = statSkillModifiersTable
@@ -150,16 +181,6 @@ class DetailSkillView : Fragment() {
             }
         }
     }
-//
-//    private fun save() {
-//        runWithLoading {
-//            controller.commit(skill)
-//        } ui {
-//            it.peek {
-//                errorAlert { "An error occurred" }
-//            }
-//        }
-//    }
 
     private fun back() {
         replaceWith<SkillsView>()
