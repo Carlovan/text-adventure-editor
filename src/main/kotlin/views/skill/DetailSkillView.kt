@@ -2,14 +2,14 @@ package views.skill
 
 import controller.SkillController
 import javafx.scene.control.TableView
+import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
+import peek
 import tornadofx.*
 import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
-import views.anySelected
-import views.isDirty
-import views.runWithLoading
-import views.ui
+import viewmodel.StatSkillModifierViewModel
+import views.*
 
 class DetailSkillView : Fragment() {
     private val controller: SkillController by inject()
@@ -17,14 +17,17 @@ class DetailSkillView : Fragment() {
     var itemSkillActivationsTable: TableView<ItemSkillActivationViewModel> by singleAssign()
     val itemSkillActivations = observableListOf<ItemSkillActivationViewModel>()
 
+    var statSkillModifiersTable: TableView<StatSkillModifierViewModel> by singleAssign()
+    val statSkillModifiers = observableListOf<StatSkillModifierViewModel>()
+
     override val root = borderpane {
         paddingAll = 20.0
         center {
             vbox {
                 spacing = 10.0
                 label("Skill ${skill.name.value}")
-                borderpane {
-                    left = vbox {
+                hbox {
+                    vbox {
                         label("Item activations:")
                         borderpane {
                             itemSkillActivationsTable = tableview {
@@ -47,15 +50,18 @@ class DetailSkillView : Fragment() {
                                 button("New") {
                                     maxWidth = Double.MAX_VALUE
                                     action {
-                                        find<CreateItemSkillActivationModal>(CreateItemSkillActivationModal::skill to skill).openModal(
-                                            block = true
-                                        )
-                                        updateData()
+                                        addItemSkillActivation()
                                     }
                                 }
                                 button("Delete") {
                                     maxWidth = Double.MAX_VALUE
                                     enableWhen { itemSkillActivationsTable.anySelected }
+                                    action {
+                                        controller.deleteItemActivation(itemSkillActivationsTable.selectedItem)
+                                            .peek {
+                                                errorAlert { "Error occoured while deleting!" }
+                                            }.onEmpty { updateData() }
+                                    }
                                 }
                                 separator()
                                 button("Save") {
@@ -68,6 +74,55 @@ class DetailSkillView : Fragment() {
                                 }
                             }
                             center = itemSkillActivationsTable
+                        }
+                    }
+                    vbox {
+                        label("Statistic modifiers:")
+                        borderpane {
+                            statSkillModifiersTable = tableview {
+                                items = statSkillModifiers
+
+                                enableCellEditing()
+                                enableDirtyTracking()
+
+                                column("Statistic", StatSkillModifierViewModel::statName)
+                                column(
+                                    "Value modifier",
+                                    StatSkillModifierViewModel::valueMod
+                                ).makeEditable()
+
+                                smartResize()
+                            }
+                            left = vbox {
+                                spacing = 10.0
+                                paddingAll = 10.0
+                                button("New") {
+                                    maxWidth = Double.MAX_VALUE
+                                    action {
+                                        addStatSkillModifier()
+                                    }
+                                }
+                                button("Delete") {
+                                    maxWidth = Double.MAX_VALUE
+                                    enableWhen { statSkillModifiersTable.anySelected }
+                                    action {
+                                        controller.deleteStatModifier(statSkillModifiersTable.selectedItem)
+                                                  .peek {
+                                                      errorAlert { "Error occoured while deleting!" }
+                                                  }.onEmpty { updateData() }
+                                    }
+                                }
+                                separator()
+                                button("Save") {
+                                    maxWidth = Double.MAX_VALUE
+                                    enableWhen(statSkillModifiersTable.isDirty)
+                                }
+                                button("Discard") {
+                                    maxWidth = Double.MAX_VALUE
+                                    enableWhen(statSkillModifiersTable.isDirty)
+                                }
+                            }
+                            center = statSkillModifiersTable
                         }
                     }
                 }
@@ -88,6 +143,11 @@ class DetailSkillView : Fragment() {
         runWithLoading { transaction { skill.itemSkillActivations } } ui {
             itemSkillActivations.clear()
             itemSkillActivations.addAll(it)
+
+            runWithLoading { transaction { skill.statSkillModifiers } } ui {
+                statSkillModifiers.clear()
+                statSkillModifiers.addAll(it)
+            }
         }
     }
 //
@@ -107,6 +167,11 @@ class DetailSkillView : Fragment() {
 
     private fun addItemSkillActivation() {
         find<CreateItemSkillActivationModal>(CreateItemSkillActivationModal::skill to skill).openModal(block = true)
+        updateData()
+    }
+
+    private fun addStatSkillModifier() {
+        find<CreateStatSkillModifierModal>(CreateStatSkillModifierModal::skill to skill).openModal(block = true)
         updateData()
     }
 

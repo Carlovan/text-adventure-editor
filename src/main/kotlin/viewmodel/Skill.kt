@@ -35,6 +35,13 @@ class DetailSkillViewModel(skill: Skill? = null) : ItemViewModel<Skill>(skill) {
         .map {
             ItemSkillActivationViewModel(item, Item.findById(it[Items.id]), it[ItemSkillActivations.quantity])
         }.asObservable()
+
+    val statSkillModifiers get() = (StatisticsSkills innerJoin Statistics)
+        .slice(Statistics.id, StatisticsSkills.value)
+        .select { Statistics.id eq StatisticsSkills.statistic and (StatisticsSkills.skill eq item.id) }
+        .map {
+            StatSkillModifierViewModel(item, Statistic.findById(it[Statistics.id]), it[StatisticsSkills.value])
+        }.asObservable()
 }
 
 class ItemSkillActivationViewModel(val skill: Skill, item: Item? = null, quantity: Int? = null) : ItemViewModel<Item>(item){
@@ -46,6 +53,19 @@ class ItemSkillActivationViewModel(val skill: Skill, item: Item? = null, quantit
     fun saveData() {
         ItemSkillActivations.update({ ItemSkillActivations.skill eq skill.id and (ItemSkillActivations.item eq item.id) }) {
             it[ItemSkillActivations.quantity] = quantityRequired.value
+        }
+    }
+}
+
+class StatSkillModifierViewModel(val skill: Skill, stat: Statistic? = null, valueMod: Int? = null) : ItemViewModel<Statistic>(stat) {
+    val statName = bind(Statistic::name) as ReadOnlyStringProperty
+    val valueMod = SimpleIntegerProperty(this, "viewModelProperty", valueMod ?: 0)
+
+    val statViewModel = SimpleObjectProperty(this, "vmp", StatisticViewModel(stat))
+
+    fun saveData() {
+        StatisticsSkills.update({ StatisticsSkills.skill eq skill.id and (StatisticsSkills.statistic eq item.id) }) {
+            it[StatisticsSkills.value] = valueMod.value
         }
     }
 }

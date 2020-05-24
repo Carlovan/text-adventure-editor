@@ -52,8 +52,9 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
                         it.peek {
                             errorAlert {
                                 when (it) {
-                                    PSQLState.UNIQUE_VIOLATION -> "Another item is associated with this skill!"
-                                    PSQLState.FOREIGN_KEY_VIOLATION -> "Another item is associated with this skill!"
+                                    PSQLState.UNIQUE_VIOLATION -> "This skill is already activated by this item!"
+                                    PSQLState.FOREIGN_KEY_VIOLATION -> "This skill is already activated by this item!"
+                                    PSQLState.CHECK_VIOLATION -> "Quantity required must be a positive number!"
                                     else -> null
                                 }
                             }
