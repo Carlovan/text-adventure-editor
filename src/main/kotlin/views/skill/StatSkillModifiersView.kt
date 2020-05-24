@@ -89,7 +89,6 @@ class CreateStatSkillModifierModal : Fragment("Create statistic skill modifier")
     val skill: DetailSkillViewModel by param()
 
     var statViewModels: ObservableList<StatisticViewModel> = observableListOf()
-    var statsCombobox: ComboBox<StatisticViewModel> by singleAssign()
     var newStatSkillModifier: StatSkillModifierViewModel by singleAssign()
 
     init {
@@ -99,7 +98,7 @@ class CreateStatSkillModifierModal : Fragment("Create statistic skill modifier")
     override val root = form {
         fieldset("New statistic modifier") {
             field("Statistic") {
-                statsCombobox = combobox(property = newStatSkillModifier.statViewModel) {
+                combobox(property = newStatSkillModifier.statViewModel) {
                     items = statViewModels
                     cellFormat { text = it.name.value.ellipses(30) }
                     required()

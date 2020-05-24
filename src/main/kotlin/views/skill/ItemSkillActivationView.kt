@@ -95,7 +95,6 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     val skill: DetailSkillViewModel by param()
 
     var itemViewModels: ObservableList<ItemViewModel> = observableListOf()
-    var itemsCombobox: ComboBox<ItemViewModel> by singleAssign()
     var newItemSkillActivation: ItemSkillActivationViewModel by singleAssign()
 
     init {
@@ -105,7 +104,7 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     override val root = form {
         fieldset("New item activation") {
             field("Item required") {
-                itemsCombobox = combobox(property = newItemSkillActivation.itemViewModel) {
+                combobox(property = newItemSkillActivation.itemViewModel) {
                     items = itemViewModels
                     cellFormat { text = "[${it.slotName.value}] ${it.name.value.ellipses(30)}" }
                     required()

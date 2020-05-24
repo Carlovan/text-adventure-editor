@@ -2,6 +2,7 @@ package views
 
 import tornadofx.*
 import views.item.ItemSlotsView
+import views.item.ItemsView
 import views.skill.SkillsView
 import views.statistic.StatisticsView
 import views.step.StepsMasterView
@@ -18,6 +19,11 @@ class MainView: View("Text adventure editor") {
                 item("Steps") {
                     action {
                         center<StepsMasterView>()
+                    }
+                }
+                item("Items") {
+                    action {
+                        center<ItemsView>()
                     }
                 }
                 item("Item slots") {
