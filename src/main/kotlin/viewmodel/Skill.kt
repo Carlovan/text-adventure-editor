@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleStringProperty
 import model.*
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import tornadofx.ItemViewModel
 import tornadofx.asObservable
@@ -29,19 +30,23 @@ class SkillViewModel(skill: Skill? = null) : ItemViewModel<Skill>(skill) {
 class DetailSkillViewModel(skill: Skill? = null) : ItemViewModel<Skill>(skill) {
     val name = bind(Skill::name)
 
-    val itemSkillActivations get() = (ItemSkillActivations innerJoin Items)
-        .slice(Items.id, ItemSkillActivations.quantity)
-        .select { Items.id eq ItemSkillActivations.item and (ItemSkillActivations.skill eq item.id) }
-        .map {
-            ItemSkillActivationViewModel(item, Item.findById(it[Items.id]), it[ItemSkillActivations.quantity])
-        }.asObservable()
+    val itemSkillActivations get() = transaction {
+        (ItemSkillActivations innerJoin Items)
+            .slice(Items.id, ItemSkillActivations.quantity)
+            .select { Items.id eq ItemSkillActivations.item and (ItemSkillActivations.skill eq item.id) }
+            .map {
+                ItemSkillActivationViewModel(item, Item.findById(it[Items.id]), it[ItemSkillActivations.quantity])
+            }.asObservable()
+    }
 
-    val statSkillModifiers get() = (StatisticsSkills innerJoin Statistics)
-        .slice(Statistics.id, StatisticsSkills.value)
-        .select { Statistics.id eq StatisticsSkills.statistic and (StatisticsSkills.skill eq item.id) }
-        .map {
-            StatSkillModifierViewModel(item, Statistic.findById(it[Statistics.id]), it[StatisticsSkills.value])
-        }.asObservable()
+    val statSkillModifiers get() = transaction {
+        (StatisticsSkills innerJoin Statistics)
+            .slice(Statistics.id, StatisticsSkills.value)
+            .select { Statistics.id eq StatisticsSkills.statistic and (StatisticsSkills.skill eq item.id) }
+            .map {
+                StatSkillModifierViewModel(item, Statistic.findById(it[Statistics.id]), it[StatisticsSkills.value])
+            }.asObservable()
+    }
 }
 
 class ItemSkillActivationViewModel(val skill: Skill, item: Item? = null, quantity: Int? = null) : ItemViewModel<Item>(item){
