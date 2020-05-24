@@ -25,4 +25,9 @@ class ItemController : ControllerWithContextAdventure() {
                 fromViewModel(newItem)
             }
         }
+
+    fun deleteItem(item: ItemViewModel): MaybePSQLError =
+        safeTransaction {
+            item.item.delete()
+        }
 }

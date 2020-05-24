@@ -52,7 +52,16 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
     }
 
     override fun deleteItem() {
-        TODO("not implemented")
+        runWithLoading { controller.deleteItem(dataTable.selectionModel.selectedItem) } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this item, it is related to other entities"
+                        else -> null
+                    }
+                }
+            }.onEmpty { updateData() }
+        }
     }
 
     override fun saveTable() {
