@@ -32,7 +32,7 @@ class EnemiesView : MasterView<EnemyViewModel>("Enemies") {
             smartResize()
         }
 
-    override val root = createRoot(false)
+    override val root = createRoot()
 
     private fun updateData() {
         runWithLoading { controller.enemies } ui {
@@ -58,6 +58,12 @@ class EnemiesView : MasterView<EnemyViewModel>("Enemies") {
 
     override fun saveTable() {
         TODO("not implemented")
+    }
+
+    override fun openDetail() {
+        runWithLoading { controller.getDetail(dataTable.selectedItem!!) } ui {
+            replaceWith(find<DetailEnemyView>(DetailEnemyView::enemy to it))
+        }
     }
 }
 
