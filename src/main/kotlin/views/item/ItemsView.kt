@@ -108,11 +108,8 @@ class CreateItemModal : Fragment("Create item") {
                     required()
                 }
             }
-            val isConsGroup = ToggleGroup()
-            isConsGroup.bind(newItem.isConsumable)
             field("Is consumable") {
-                radiobutton("True", isConsGroup, value = true)
-                radiobutton("False", isConsGroup, value = false).isSelected = true
+                checkbox(property = newItem.isConsumable)
             }
         }
         hbox {
