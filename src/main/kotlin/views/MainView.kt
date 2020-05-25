@@ -1,6 +1,7 @@
 package views
 
 import tornadofx.*
+import views.enemy.EnemiesView
 import views.item.ItemSlotsView
 import views.item.ItemsView
 import views.skill.SkillsView
@@ -29,6 +30,11 @@ class MainView: View("Text adventure editor") {
                 item("Item slots") {
                     action {
                         center<ItemSlotsView>()
+                    }
+                }
+                item("Enemies") {
+                    action {
+                        center<EnemiesView>()
                     }
                 }
             }
