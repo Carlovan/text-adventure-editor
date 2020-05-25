@@ -4,6 +4,7 @@ import controller.ItemSlotController
 import javafx.scene.control.TableView
 import onEmpty
 import peek
+import sqlutils.MaybePSQLError
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.ItemSlotViewModel
@@ -17,7 +18,7 @@ class ItemSlotsView : MasterView<ItemSlotViewModel>("Item slots") {
 
     private val slots = observableListOf<ItemSlotViewModel>()
 
-    override val root = createRoot(false)
+    override val root = createRoot()
 
     override fun createDataTable(): TableView<ItemSlotViewModel> =
         tableview {
@@ -27,7 +28,11 @@ class ItemSlotsView : MasterView<ItemSlotViewModel>("Item slots") {
             enableDirtyTracking()
 
             column("Name", ItemSlotViewModel::name).makeEditable()
-            column("Capacity", ItemSlotViewModel::capacity).makeEditable()
+            column("Capacity", ItemSlotViewModel::capacity) {
+                cellFormat {
+                    text = if (it == 0) "∞" else it.toString()
+                }
+            }
         }
 
     private fun updateData() {
@@ -74,28 +79,40 @@ class ItemSlotsView : MasterView<ItemSlotViewModel>("Item slots") {
         }
     }
 
+    override fun openDetail() {
+        find<DetailItemSlotModal>(DetailItemSlotModal::itemSlot to dataTable.selectedItem).openModal(block = true)
+        updateData()
+    }
+
     override fun onDock() {
         updateData()
     }
 }
 
-class CreateItemSlotModal : Fragment() {
-    private val controller: ItemSlotController by inject()
-    private val newSlot = ItemSlotViewModel()
+abstract class ItemSlotForm(private val isCreate: Boolean) : Fragment() {
+    protected val controller: ItemSlotController by inject()
+    val itemSlot by param(ItemSlotViewModel())
+    private val isInfinite = booleanProperty(itemSlot.capacity.value == 0)
 
     override val root = form {
         fieldset("Create item slot") {
             field("Slot name") {
-                textfield(newSlot.name).required()
+                textfield(itemSlot.name).required()
+            }
+            field("Is infinite") {
+                checkbox(property = isInfinite)
             }
             field("Slot capacity") {
-                textfield(newSlot.capacity) {
+                hiddenWhen(isInfinite)
+                textfield(itemSlot.capacity) {
                     required()
                     validator { text ->
-                        if (text?.toIntOrNull() ?: -1 < 0) {
-                            error("Only positive integers are allowed")
-                        } else {
-                            null
+                        with(text?.toIntOrNull()) {
+                            if (this != null && this < 0) {
+                                error("Only positive integers are allowed")
+                            } else {
+                                null
+                            }
                         }
                     }
                     filterInput { it.controlNewText.isInt() }
@@ -104,8 +121,8 @@ class CreateItemSlotModal : Fragment() {
         }
         hbox {
             spacing = 10.0
-            button("Create") {
-                enableWhen(newSlot.valid)
+            button(if(isCreate) "Create" else "Save") {
+                enableWhen(itemSlot.valid)
                 action(::save)
             }
             button("Cancel") {
@@ -117,10 +134,29 @@ class CreateItemSlotModal : Fragment() {
     }
 
     private fun save() {
-        runWithLoading { controller.createSlot(newSlot) } ui {
+        if (isInfinite.value) {
+            itemSlot.capacity.value = 0
+        }
+        runWithLoading { saveAction() } ui {
             it.peek {
-                errorAlert { "Cannot create the item slot! $it" }
+                val baseMsg = "Cannot ${if(isCreate) "create" else "save"} the item slot!"
+                errorAlert { when(it) {
+                    PSQLState.UNIQUE_VIOLATION -> "$baseMsg A slot with the same name exists"
+                    else -> "$baseMsg $it"
+                } }
             }.onEmpty { runLater { close() } }
         }
     }
+
+    protected abstract fun saveAction(): MaybePSQLError // This action is performed with loading
+}
+
+class CreateItemSlotModal : ItemSlotForm(true) {
+    override fun saveAction(): MaybePSQLError =
+        controller.createSlot(itemSlot)
+}
+
+class DetailItemSlotModal : ItemSlotForm(false) {
+    override fun saveAction(): MaybePSQLError =
+        controller.commit(itemSlot)
 }

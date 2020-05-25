@@ -29,6 +29,9 @@ class ItemSlotController : ControllerWithContextAdventure() {
             changes.forEach { it.saveData() }
         }
 
+    fun commit(change: ItemSlotViewModel) =
+        commit(sequenceOf(change))
+
     fun deleteSlot(slot: ItemSlotViewModel) =
         safeTransaction { slot.item.delete() }
 }
