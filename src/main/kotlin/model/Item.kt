@@ -60,6 +60,8 @@ object Loots : AdventureTable("LOOT") {
 class Loot(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Loot>(Loots)
 
+    var adventure by Loots.adventure
+
     var desc by Loots.desc
 }
 
