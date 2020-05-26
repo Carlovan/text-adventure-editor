@@ -57,5 +57,5 @@ abstract class MasterView<T>(title: String? = null) : View(title) {
     protected open fun discardTable() {
         dataTable.editModel.rollback()
     }
-    protected open fun openDetail() { TODO("You should override this") }
+    protected open fun openDetail() { throw NotImplementedError("You should override this") }
 }

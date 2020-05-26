@@ -38,4 +38,7 @@ class ItemController : ControllerWithContextAdventure() {
                 it.rollback()
             }
         }
+
+    fun commit(change: ItemViewModel) =
+        commit(sequenceOf(change))
 }

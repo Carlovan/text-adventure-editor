@@ -4,11 +4,10 @@ import controller.ItemController
 import controller.ItemSlotController
 import ellipses
 import javafx.geometry.Pos
-import javafx.scene.Parent
 import javafx.scene.control.TableView
-import javafx.scene.control.ToggleGroup
 import onEmpty
 import peek
+import sqlutils.MaybePSQLError
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.ItemSlotViewModel
@@ -21,7 +20,7 @@ import views.ui
 class ItemsView : MasterView<ItemViewModel>("Items") {
     val controller : ItemController by inject()
 
-    val itemsList = observableListOf<ItemViewModel>()
+    private val itemsList = observableListOf<ItemViewModel>()
 
     override fun createDataTable(): TableView<ItemViewModel> =
         tableview {
@@ -37,7 +36,7 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
             smartResize()
         }
 
-    override val root = createRoot(false)
+    override val root = createRoot()
 
     private fun updateData() {
         runWithLoading { controller.items } ui {
@@ -84,40 +83,44 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
         }
     }
 
+    override fun openDetail() {
+        find<DetailItemModal>(DetailItemModal::item to dataTable.selectedItem).openModal(block = true)
+        updateData()
+    }
+
     override fun onDock() {
         updateData()
     }
 }
 
-class CreateItemModal : Fragment("Create item") {
-    private val controller: ItemController by inject()
+abstract class ItemForm(private val isCreate: Boolean, title: String) : Fragment(title) {
+    protected val controller: ItemController by inject()
     private val itemSlotsController: ItemSlotController by inject()
 
     private val itemSlotViewModels = observableListOf<ItemSlotViewModel>()
-    private val newItem = ItemViewModel()
+    val item by param(ItemViewModel())
 
     override val root = form {
         fieldset("Item") {
             field("Name") {
-                textfield(newItem.name).required()
+                textfield(item.name).required()
             }
             field("Item slot") {
-                combobox(property = newItem.itemSlotViewModel) {
-                    items = itemSlotViewModels
+                combobox(item.itemSlotViewModel, itemSlotViewModels) { // TODO bound property is not formatted propertly
                     cellFormat { text = it.name.value.ellipses(30) }
                     required()
                 }
             }
             field("Is consumable") {
-                checkbox(property = newItem.isConsumable)
+                checkbox(property = item.isConsumable)
             }
         }
         hbox {
-            button("Create") {
-                enableWhen(newItem.valid)
+            button(if(isCreate) "Create" else "Save") {
+                enableWhen(item.valid)
                 alignment = Pos.BOTTOM_RIGHT
                 action {
-                    runWithLoading { controller.createItem(newItem) } ui {
+                    runWithLoading { saveAction() } ui {
                         it.peek {
                             errorAlert {
                                 when (it) {
@@ -132,10 +135,24 @@ class CreateItemModal : Fragment("Create item") {
         }
     }
 
+    abstract fun saveAction(): MaybePSQLError // This is run with loading
+
     override fun onDock() {
-        runWithLoading { itemSlotsController.itemSlots } ui {
-            itemSlotViewModels.clear()
-            itemSlotViewModels.addAll(it)
+        runLater {
+            runWithLoading { itemSlotsController.itemSlots } ui {
+                itemSlotViewModels.clear()
+                itemSlotViewModels.addAll(it)
+            }
         }
     }
+}
+
+class CreateItemModal : ItemForm(true, "Create item") {
+    override fun saveAction(): MaybePSQLError =
+        controller.createItem(item)
+}
+
+class DetailItemModal : ItemForm(false, "Edit item") {
+    override fun saveAction(): MaybePSQLError =
+        controller.commit(item)
 }
