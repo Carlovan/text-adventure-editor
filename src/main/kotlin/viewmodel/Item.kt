@@ -2,14 +2,15 @@ package viewmodel
 
 import model.Item
 import model.ItemSlot
-import tornadofx.ItemViewModel
+import tornadofx.select
+import tornadofx.property
 
 fun ItemSlot.fromViewModel(data: ItemSlotViewModel) {
     name = data.name.value
     capacity = data.capacity.value
 }
 
-class ItemSlotViewModel(initialValue: ItemSlot? = null) : ItemViewModel<ItemSlot>(initialValue) {
+class ItemSlotViewModel(initialValue: ItemSlot? = null) : tornadofx.ItemViewModel<ItemSlot>(initialValue) {
     val name = bind(ItemSlot::name)
     val capacity = bind(ItemSlot::capacity, defaultValue = 1)
     fun saveData() {
