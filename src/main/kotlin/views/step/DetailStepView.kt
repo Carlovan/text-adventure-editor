@@ -3,6 +3,7 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
@@ -10,6 +11,7 @@ import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
 import views.anySelected
 import views.errorAlert
+import views.loot.SelectLootModal
 import views.runWithLoading
 import views.ui
 
@@ -28,6 +30,15 @@ class DetailStepView : Fragment() {
                 spacing = 10.0
                 label("Step number ${step.number.value}")
                 textarea(step.text)
+                hbox {
+                    spacing = 10.0
+                    alignment = Pos.CENTER_LEFT
+                    label("Contained loot:")
+                    label(step.loot.select { it.desc })
+                    button("Change") {
+                        action(::selectLoot)
+                    }
+                }
                 label("Choices:")
                 borderpane {
                     val choiceList = listview(choices) {
@@ -108,6 +119,10 @@ class DetailStepView : Fragment() {
 
     private fun openDetail() {
         TODO()
+    }
+
+    private fun selectLoot() {
+        find<SelectLootModal>(SelectLootModal::selectedLoot to step.loot).openModal(block = true)
     }
 
     override fun onDock() {
