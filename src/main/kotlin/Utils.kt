@@ -1,3 +1,4 @@
+import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -13,3 +14,5 @@ fun String.ellipses(maxLength: Int) =
     } else {
         this
     }
+
+fun Int.toStringWithSign() = DecimalFormat("+#;-#").format(this)

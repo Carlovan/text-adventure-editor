@@ -6,8 +6,8 @@ import model.Statistic
 import model.StatisticsItems
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.select
+import toStringWithSign
 import tornadofx.*
-import java.text.DecimalFormat
 
 fun ItemSlot.fromViewModel(data: ItemSlotViewModel) {
     name = data.name.value
@@ -44,7 +44,7 @@ class ItemViewModel(item: Item? = null) : tornadofx.ItemViewModel<Item>(item) {
         } ?: observableListOf()
 
     val modifiedStatsSummary =
-        modifiedStats.joinToString { "${it.statistic.value.name.value} (${DecimalFormat("+#;-#").format(it.value.value)})" }
+        modifiedStats.joinToString { "${it.statistic.value.name.value} (${it.value.value.toStringWithSign()})" }
             .toProperty()
 
     fun saveData() {
