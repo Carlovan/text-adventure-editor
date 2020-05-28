@@ -2,8 +2,12 @@ package viewmodel
 
 import model.Item
 import model.ItemSlot
-import tornadofx.select
-import tornadofx.property
+import model.Statistic
+import model.StatisticsItems
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.select
+import tornadofx.*
+import java.text.DecimalFormat
 
 fun ItemSlot.fromViewModel(data: ItemSlotViewModel) {
     name = data.name.value
@@ -31,7 +35,24 @@ class ItemViewModel(item: Item? = null) : tornadofx.ItemViewModel<Item>(item) {
     val itemSlotViewModel = property(item?.itemSlot?.let { ItemSlotViewModel(it) }).fxProperty
     val slotName = itemSlotViewModel.select { it.name }
 
+    val modifiedStats
+        get() = item?.let {
+            StatisticsItems
+                .select { StatisticsItems.item eq item.id }
+                .map { ItemStatisticViewModel(it[StatisticsItems.statistic], it[StatisticsItems.value]) }
+                .toList().asObservable()
+        } ?: observableListOf()
+
+    val modifiedStatsSummary =
+        modifiedStats.joinToString { "${it.statistic.value.name.value} (${DecimalFormat("+#;-#").format(it.value.value)})" }
+            .toProperty()
+
     fun saveData() {
         item?.fromViewModel(this)
     }
+}
+
+class ItemStatisticViewModel(statisticId: EntityID<Int>? = null, value: Int = 0) : ViewModel() {
+    val statistic = property(statisticId?.let { StatisticViewModel(Statistic.findById(statisticId)) }).fxProperty
+    val value = property(value).fxProperty
 }

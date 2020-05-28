@@ -61,7 +61,7 @@ class DetailLootView : Fragment("Loot") {
         updateData()
     }
 
-    inner class LootItemsMasterTable() : MasterView<LootItemViewModel>() {
+    inner class LootItemsMasterTable : MasterView<LootItemViewModel>() {
         override val root = createRoot(false)
 
         override fun createDataTable(): TableView<LootItemViewModel> =

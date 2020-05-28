@@ -3,11 +3,10 @@ package views.item
 import controller.ItemController
 import controller.ItemSlotController
 import ellipses
-import javafx.geometry.Pos
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.TableView
 import onEmpty
 import peek
-import sqlutils.MaybePSQLError
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.ItemSlotViewModel
@@ -18,7 +17,7 @@ import views.runWithLoading
 import views.ui
 
 class ItemsView : MasterView<ItemViewModel>("Items") {
-    val controller : ItemController by inject()
+    val controller: ItemController by inject()
 
     private val itemsList = observableListOf<ItemViewModel>()
 
@@ -32,6 +31,7 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
             column("Name", ItemViewModel::name).makeEditable()
             column("Slot", ItemViewModel::slotName)
             column("Consumable", ItemViewModel::isConsumable).makeEditable()
+            column("Modified stats", ItemViewModel::modifiedStatsSummary)
 
             smartResize()
         }
@@ -84,8 +84,7 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
     }
 
     override fun openDetail() {
-        find<DetailItemModal>(DetailItemModal::item to dataTable.selectedItem).openModal(block = true)
-        updateData()
+        replaceWith(find<DetailItemView>(DetailItemView::item to dataTable.selectedItem))
     }
 
     override fun onDock() {
@@ -93,12 +92,12 @@ class ItemsView : MasterView<ItemViewModel>("Items") {
     }
 }
 
-abstract class ItemForm(private val isCreate: Boolean, title: String) : Fragment(title) {
-    protected val controller: ItemController by inject()
+class ItemForm : Fragment() {
     private val itemSlotsController: ItemSlotController by inject()
+    val item by param(ItemViewModel())
+    val doneLoading = SimpleBooleanProperty(false)
 
     private val itemSlotViewModels = observableListOf<ItemSlotViewModel>()
-    val item by param(ItemViewModel())
 
     override val root = form {
         fieldset("Item") {
@@ -115,44 +114,13 @@ abstract class ItemForm(private val isCreate: Boolean, title: String) : Fragment
                 checkbox(property = item.isConsumable)
             }
         }
-        hbox {
-            button(if(isCreate) "Create" else "Save") {
-                enableWhen(item.valid)
-                alignment = Pos.BOTTOM_RIGHT
-                action {
-                    runWithLoading { saveAction() } ui {
-                        it.peek {
-                            errorAlert {
-                                when (it) {
-                                    PSQLState.UNIQUE_VIOLATION -> "Item name is not unique!"
-                                    else -> null
-                                }
-                            }
-                        }.onEmpty { runLater { close() } }
-                    }
-                }
-            }
-        }
     }
-
-    abstract fun saveAction(): MaybePSQLError // This is run with loading
 
     override fun onDock() {
-        runLater {
-            runWithLoading { itemSlotsController.itemSlots } ui {
-                itemSlotViewModels.clear()
-                itemSlotViewModels.addAll(it)
-            }
+        runWithLoading { itemSlotsController.itemSlots } ui {
+            itemSlotViewModels.clear()
+            itemSlotViewModels.addAll(it)
+            doneLoading.value = true
         }
     }
-}
-
-class CreateItemModal : ItemForm(true, "Create item") {
-    override fun saveAction(): MaybePSQLError =
-        controller.createItem(item)
-}
-
-class DetailItemModal : ItemForm(false, "Edit item") {
-    override fun saveAction(): MaybePSQLError =
-        controller.commit(item)
 }

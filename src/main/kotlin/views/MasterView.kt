@@ -8,7 +8,7 @@ abstract class MasterView<T>(title: String? = null) : View(title) {
         createDataTable()
     }
 
-    protected fun createButtons(withDetail: Boolean = true) =
+    protected open fun createButtons(withDetail: Boolean = true) =
         vbox {
             spacing = 10.0
             paddingAll = 10.0
@@ -57,5 +57,8 @@ abstract class MasterView<T>(title: String? = null) : View(title) {
     protected open fun discardTable() {
         dataTable.editModel.rollback()
     }
-    protected open fun openDetail() { throw NotImplementedError("You should override this") }
+
+    protected open fun openDetail() {
+        throw NotImplementedError("You should override this")
+    }
 }

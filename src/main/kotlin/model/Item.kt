@@ -49,8 +49,6 @@ class Item(id: EntityID<Int>) : IntEntity(id) {
     var isConsumable by Items.isConsumable
 
     var itemSlot by ItemSlot referencedOn Items.itemSlot
-
-    // TODO add statistic modifier
 }
 
 object Loots : AdventureTable("LOOT") {

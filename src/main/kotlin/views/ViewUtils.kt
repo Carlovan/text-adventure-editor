@@ -4,8 +4,8 @@ import javafx.event.EventHandler
 import javafx.scene.control.Alert
 import javafx.scene.layout.Region
 import javafx.stage.Modality
+import javafx.util.converter.IntegerStringConverter
 import tornadofx.UIComponent
-import tornadofx.View
 import tornadofx.runLater
 
 fun UIComponent.errorAlert(contentSupplier: () -> String?) {
@@ -16,8 +16,19 @@ fun UIComponent.errorAlert(contentSupplier: () -> String?) {
         initModality(Modality.APPLICATION_MODAL)
         initOwner(primaryStage)
         isResizable = true
-        onShown = EventHandler { // Workaround https://stackoverflow.com/questions/55190380/javafx-creates-alert-dialog-which-is-too-small
-            runLater { isResizable = false }
-        }
+        onShown =
+            EventHandler { // Workaround https://stackoverflow.com/questions/55190380/javafx-creates-alert-dialog-which-is-too-small
+                runLater { isResizable = false }
+            }
     }.show()
+}
+
+class IntegerStringConverterWithDefault(private val default: Int) : IntegerStringConverter() {
+    override fun fromString(p0: String?): Int {
+        return try {
+            super.fromString(p0)
+        } catch (ex: NumberFormatException) {
+            null
+        } ?: default
+    }
 }
