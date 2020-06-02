@@ -9,6 +9,7 @@ import tornadofx.*
 import viewmodel.DetailLootViewModel
 import viewmodel.LootItemViewModel
 import views.errorAlert
+import views.requiredPositiveInteger
 import views.runWithLoading
 import views.ui
 
@@ -34,14 +35,7 @@ class AddLootItemModal : Fragment("Add item") {
             field("Quantity") {
                 textfield(newLootItem.quantity) {
                     required()
-                    validator { text ->
-                        if (text != null && text.toIntOrNull() ?: 0 <= 0) {
-                            error("Quantity must be a positive integer")
-                        } else {
-                            null
-                        }
-                    }
-                    filterInput { it.controlNewText.isInt() }
+                    requiredPositiveInteger()
                 }
             }
         }

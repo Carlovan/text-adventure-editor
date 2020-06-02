@@ -8,10 +8,7 @@ import sqlutils.MaybePSQLError
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.ItemSlotViewModel
-import views.MasterView
-import views.errorAlert
-import views.runWithLoading
-import views.ui
+import views.*
 
 class ItemSlotsView : MasterView<ItemSlotViewModel>("Item slots") {
     private val controller: ItemSlotController by inject()
@@ -106,22 +103,13 @@ abstract class ItemSlotForm(private val isCreate: Boolean) : Fragment() {
                 hiddenWhen(isInfinite)
                 textfield(itemSlot.capacity) {
                     required()
-                    validator { text ->
-                        with(text?.toIntOrNull()) {
-                            if (this != null && this < 0) {
-                                error("Only positive integers are allowed")
-                            } else {
-                                null
-                            }
-                        }
-                    }
-                    filterInput { it.controlNewText.isInt() }
+                    requiredPositiveInteger()
                 }
             }
         }
         hbox {
             spacing = 10.0
-            button(if(isCreate) "Create" else "Save") {
+            button(if (isCreate) "Create" else "Save") {
                 enableWhen(itemSlot.valid)
                 action(::save)
             }
@@ -139,11 +127,13 @@ abstract class ItemSlotForm(private val isCreate: Boolean) : Fragment() {
         }
         runWithLoading { saveAction() } ui {
             it.peek {
-                val baseMsg = "Cannot ${if(isCreate) "create" else "save"} the item slot!"
-                errorAlert { when(it) {
-                    PSQLState.UNIQUE_VIOLATION -> "$baseMsg A slot with the same name exists"
-                    else -> "$baseMsg $it"
-                } }
+                val baseMsg = "Cannot ${if (isCreate) "create" else "save"} the item slot!"
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "$baseMsg A slot with the same name exists"
+                        else -> "$baseMsg $it"
+                    }
+                }
             }.onEmpty { runLater { close() } }
         }
     }

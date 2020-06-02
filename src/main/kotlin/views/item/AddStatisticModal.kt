@@ -12,10 +12,7 @@ import tornadofx.*
 import viewmodel.ItemStatisticViewModel
 import viewmodel.ItemViewModel
 import viewmodel.StatisticViewModel
-import views.IntegerStringConverterWithDefault
-import views.errorAlert
-import views.runWithLoading
-import views.ui
+import views.*
 
 class AddItemStatisticModal : Fragment("Add statistic modifier") {
     private val statisticController: StatisticController by inject()
@@ -39,13 +36,7 @@ class AddItemStatisticModal : Fragment("Add statistic modifier") {
             field("Value") {
                 textfield(newStatisticModifier.value, IntegerStringConverterWithDefault(0)) {
                     required()
-                    validator {
-                        if (it != null && it.isNotEmpty() && !it.isInt()) {
-                            error("An integer value is required")
-                        } else {
-                            null
-                        }
-                    }
+                    requiredInteger()
                 }
             }
         }
