@@ -5,6 +5,7 @@ import views.enemy.EnemiesView
 import views.item.ItemSlotsView
 import views.item.ItemsView
 import views.loot.LootsView
+import views.player.PlayerConfigurationsView
 import views.skill.SkillsView
 import views.statistic.StatisticsView
 import views.step.StepsMasterView
@@ -45,6 +46,11 @@ class MainView: View("Text adventure editor") {
                 }
             }
             menu("Player") {
+                item("Configurations") {
+                    action {
+                        center<PlayerConfigurationsView>()
+                    }
+                }
                 item("Statistics") {
                     action {
                         center<StatisticsView>()
