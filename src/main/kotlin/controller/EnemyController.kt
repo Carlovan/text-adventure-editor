@@ -2,7 +2,10 @@ package controller
 
 import javafx.collections.ObservableList
 import model.Enemies
+import model.EnemiesStatistics
 import model.Enemy
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import sqlutils.MaybePSQLError
 import sqlutils.safeTransaction
@@ -29,6 +32,14 @@ class EnemyController : ControllerWithContextAdventure() {
             vm.item.delete()
         }
 
+    fun commit(changes: Sequence<EnemyViewModel>) =
+        safeTransaction {
+            changes.forEach {
+                it.saveData()
+                it.rollback()
+            }
+        }
+
     fun getDetail(master: EnemyViewModel) : DetailEnemyViewModel {
         return transaction { DetailEnemyViewModel(master.item) }
     }
@@ -36,5 +47,23 @@ class EnemyController : ControllerWithContextAdventure() {
     fun addEnemyStatistic(newEnemyStatValue: EnemyStatValueViewModel) =
         safeTransaction {
             newEnemyStatValue.enemy.addStatistic(newEnemyStatValue.statisticViewModel.value.item, newEnemyStatValue.value.value)
+        }
+
+    fun updateLoot(enemy: DetailEnemyViewModel) =
+        safeTransaction {
+            enemy.item.loot = enemy.loot.value?.item
+        }
+
+    fun commitEnemyStats(changes: Sequence<EnemyStatValueViewModel>) =
+        safeTransaction {
+            changes.forEach {
+                it.saveData()
+                it.rollback()
+            }
+        }
+
+    fun deleteEnemyStat(enemyStat: EnemyStatValueViewModel) =
+        safeTransaction {
+            EnemiesStatistics.deleteWhere { EnemiesStatistics.enemy eq enemyStat.enemy.id and (EnemiesStatistics.statistic eq enemyStat.item.id) }
         }
 }

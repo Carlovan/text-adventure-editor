@@ -52,12 +52,35 @@ class EnemiesView : MasterView<EnemyViewModel>("Enemies") {
 
     override fun deleteItem() {
         runWithLoading { controller.deleteEnemy(dataTable.selectionModel.selectedItem) } ui {
-            updateData()
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.FOREIGN_KEY_VIOLATION -> "Cannot delete this enemy, it is related to other entities"
+                        else -> null
+                    }
+                }
+            }.onEmpty { updateData() }
         }
     }
 
     override fun saveTable() {
-        TODO("not implemented")
+        runWithLoading {
+            with(dataTable.editModel) {
+                controller.commit(items
+                    .asSequence()
+                    .filter { it.value.isDirty }
+                    .map { it.key })
+            }
+        } ui {
+            it.peek {
+                errorAlert {
+                    when (it) {
+                        PSQLState.UNIQUE_VIOLATION -> "Enemy name is not unique!"
+                        else -> null
+                    }
+                }
+            }.onEmpty { dataTable.editModel.commit() }
+        }
     }
 
     override fun openDetail() {
