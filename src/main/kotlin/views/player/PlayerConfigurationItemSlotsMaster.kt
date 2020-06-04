@@ -66,7 +66,7 @@ class PlayerConfigurationItemSlotsMaster : Fragment("Item slots") {
         }
     }
 
-    override fun onDock() {
+    override fun onTabSelected() {
         updateData()
     }
 }
