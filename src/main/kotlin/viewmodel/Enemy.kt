@@ -33,7 +33,7 @@ class DetailEnemyViewModel(enemy: Enemy) : ItemViewModel<Enemy>(enemy) {
             .asObservable()
     }
 
-    val loot = SimpleObjectProperty(this, "ref3", LootViewModel(enemy.loot))
+    val loot = SimpleObjectProperty(this, "ref3", enemy.loot?.let { LootViewModel(it) })
 }
 
 class EnemyStatValueViewModel(val enemy: Enemy, stat: Statistic? = null, value: Int? = null) : ItemViewModel<Statistic>(stat) {

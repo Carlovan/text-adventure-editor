@@ -40,7 +40,7 @@ class DetailEnemyView : Fragment() {
             spacing = 10.0
             alignment = Pos.CENTER_LEFT
             label("Enemy loot:")
-            label(enemy.loot.select { it.desc })
+            label(stringBinding(enemy.loot) { enemy.loot.value?.desc?.value ?: "(no loot)" })
             button("Change") {
                 action {
                     find<SelectLootModal>(SelectLootModal::selectedObject to enemy.loot).openModal(block = true)

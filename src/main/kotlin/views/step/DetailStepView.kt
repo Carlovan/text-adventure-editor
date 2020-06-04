@@ -34,9 +34,13 @@ class DetailStepView : Fragment() {
                     spacing = 10.0
                     alignment = Pos.CENTER_LEFT
                     label("Contained loot:")
-                    label(step.loot.select { it.desc })
+                    label(stringBinding(step.loot) { step.loot.value?.desc?.value ?: "(no loot)" })
                     button("Change") {
                         action(::selectLoot)
+                    }
+                    button("Remove") {
+                        enableWhen(step.loot.isNotNull)
+                        action(::removeLoot)
                     }
                 }
                 label("Choices:")
@@ -123,6 +127,10 @@ class DetailStepView : Fragment() {
 
     private fun selectLoot() {
         find<SelectLootModal>(SelectLootModal::selectedObject to step.loot).openModal(block = true)
+    }
+
+    private fun removeLoot() {
+        step.loot.value = null
     }
 
     override fun onDock() {
