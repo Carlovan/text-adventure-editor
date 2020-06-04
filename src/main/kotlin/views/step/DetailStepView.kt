@@ -122,7 +122,7 @@ class DetailStepView : Fragment() {
     }
 
     private fun selectLoot() {
-        find<SelectLootModal>(SelectLootModal::selectedLoot to step.loot).openModal(block = true)
+        find<SelectLootModal>(SelectLootModal::selectedObject to step.loot).openModal(block = true)
     }
 
     override fun onDock() {
