@@ -5,12 +5,12 @@ import onEmpty
 import peek
 import sqlutils.PSQLState
 import tornadofx.*
-import viewmodel.PlayerConfigurationViewModel
+import viewmodel.SimplePlayerConfigurationViewModel
 import views.*
 
 class CreatePlayerConfigurationModal : Fragment("Create player configuration") {
     private val controller: PlayerConfigurationController by inject()
-    private val newConfiguration = PlayerConfigurationViewModel()
+    private val newConfiguration = SimplePlayerConfigurationViewModel()
 
     override val root = form {
         paddingAll = 20.0

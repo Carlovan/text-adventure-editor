@@ -6,28 +6,31 @@ import onEmpty
 import peek
 import sqlutils.PSQLState
 import tornadofx.*
-import viewmodel.PlayerConfigurationViewModel
+import viewmodel.MasterPlayerConfigurationViewModel
 import views.MasterView
 import views.errorAlert
 import views.runWithLoading
 import views.ui
 
-class PlayerConfigurationsView : MasterView<PlayerConfigurationViewModel>("Player configurations") {
+class PlayerConfigurationsView : MasterView<MasterPlayerConfigurationViewModel>("Player configurations") {
     private val controller: PlayerConfigurationController by inject()
-    private val configurations = observableListOf<PlayerConfigurationViewModel>()
+    private val configurations = observableListOf<MasterPlayerConfigurationViewModel>()
 
-    override fun createDataTable(): TableView<PlayerConfigurationViewModel> =
+    override fun createDataTable(): TableView<MasterPlayerConfigurationViewModel> =
         tableview(configurations) {
             enableDirtyTracking()
             enableCellEditing()
 
-            column("Name", PlayerConfigurationViewModel::name).makeEditable()
-            column("Max skills", PlayerConfigurationViewModel::maxSkills).makeEditable()
+            column("Name", MasterPlayerConfigurationViewModel::name).makeEditable()
+            column("Max skills", MasterPlayerConfigurationViewModel::maxSkills).makeEditable()
+            column("# Skills", MasterPlayerConfigurationViewModel::skillsCount)
+            column("# Item Slots", MasterPlayerConfigurationViewModel::slotsCount)
+            column("# Statistics", MasterPlayerConfigurationViewModel::statisticsCount)
 
             smartResize()
         }
 
-    override val root = createRoot(false)
+    override val root = createRoot()
 
     fun updateData() {
         runWithLoading { controller.playerConfigurations } ui {
@@ -73,6 +76,12 @@ class PlayerConfigurationsView : MasterView<PlayerConfigurationViewModel>("Playe
                 }
             }.onEmpty { dataTable.editModel.commit() }
         }
+    }
+
+    override fun openDetail() {
+        replaceWith(find<DetailPlayerConfigurationView>(
+            DetailPlayerConfigurationView::configuration to controller.getDetail(dataTable.selectedItem!!)
+        ))
     }
 
     override fun onDock() {

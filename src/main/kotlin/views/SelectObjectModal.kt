@@ -10,7 +10,7 @@ import tornadofx.*
  */
 abstract class SelectObjectModal<T>(title: String = "") : Fragment(title) {
     /**
-     * This is used as return value. Can be set as parameter from TornadoFX or can be accessed from the object of [SelectLootModal] itself.
+     * This is used as return value. Can be set as parameter from TornadoFX or can be accessed from the object of [views.loot.SelectLootModal] itself.
      */
     val selectedObject by param(SimpleObjectProperty<T>())
     private val oldValue = selectedObject.value
