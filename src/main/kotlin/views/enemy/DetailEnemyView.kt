@@ -43,7 +43,7 @@ class DetailEnemyView : Fragment() {
             label(enemy.loot.select { it.desc })
             button("Change") {
                 action {
-                    find<SelectLootModal>(SelectLootModal::selectedLoot to enemy.loot).openModal(block = true)
+                    find<SelectLootModal>(SelectLootModal::selectedObject to enemy.loot).openModal(block = true)
                     runWithLoading { controller.updateLoot(enemy) }
                 }
             }
