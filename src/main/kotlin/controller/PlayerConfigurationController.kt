@@ -3,10 +3,12 @@ package controller
 import model.PlayerAvailableSlots
 import model.PlayerConfiguration
 import model.PlayerConfigurations
+import model.StatisticsPlayerConfigurations
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import sqlutils.MaybePSQLError
 import sqlutils.safeTransaction
 import tornadofx.asObservable
 import viewmodel.*
@@ -58,4 +60,24 @@ class PlayerConfigurationController : ControllerWithContextAdventure() {
 
     fun getDetail(configuration: MasterPlayerConfigurationViewModel) =
         transaction { DetailPlayerConfigurationViewModel(configuration.item) }
+
+    fun removeStatistic(
+        configuration: DetailPlayerConfigurationViewModel,
+        statisticViewModel: StatisticViewModel?
+    ): MaybePSQLError {
+        return safeTransaction {
+            StatisticsPlayerConfigurations.deleteWhere {
+                StatisticsPlayerConfigurations.playerConf eq configuration.item.id and (StatisticsPlayerConfigurations.statistic eq statisticViewModel!!.item.id)
+            }
+        }
+    }
+
+    fun addStatistic(configuration: DetailPlayerConfigurationViewModel, statistic: StatisticViewModel): MaybePSQLError {
+        return safeTransaction {
+            StatisticsPlayerConfigurations.insert {
+                it[StatisticsPlayerConfigurations.playerConf] = configuration.item.id
+                it[StatisticsPlayerConfigurations.statistic] = statistic.item.id
+            }
+        }
+    }
 }
