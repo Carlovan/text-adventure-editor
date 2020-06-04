@@ -41,7 +41,6 @@ class DetailPlayerConfigurationViewModel(initialValue: PlayerConfiguration? = nu
     val slots
         get() =
             item?.let {
-                println(it.id)
                 PlayerAvailableSlots.select { PlayerAvailableSlots.playerConf eq it.id }
                     .map { row ->
                         PlayerAvailableSlotViewModel(

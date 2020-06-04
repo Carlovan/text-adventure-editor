@@ -4,6 +4,7 @@ import model.PlayerAvailableSlots
 import model.PlayerConfiguration
 import model.PlayerConfigurations
 import model.StatisticsPlayerConfigurations
+import model.SkillsPlayerConfigurations
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -78,6 +79,20 @@ class PlayerConfigurationController : ControllerWithContextAdventure() {
                 it[StatisticsPlayerConfigurations.playerConf] = configuration.item.id
                 it[StatisticsPlayerConfigurations.statistic] = statistic.item.id
             }
+        }
+    }
+
+    fun removeSkill(configuration: SimplePlayerConfigurationViewModel, skillValue: SkillViewModel) = safeTransaction {
+        SkillsPlayerConfigurations.deleteWhere {
+            (SkillsPlayerConfigurations.playerConf eq configuration.item.id) and
+                    (SkillsPlayerConfigurations.skill eq skillValue.item.id)
+        }
+    }
+
+    fun addSkill(configuration: SimplePlayerConfigurationViewModel, skillValue: SkillViewModel) = safeTransaction {
+        SkillsPlayerConfigurations.insert {
+            it[playerConf] = configuration.item.id
+            it[skill] = skillValue.item.id
         }
     }
 }

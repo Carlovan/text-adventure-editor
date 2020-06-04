@@ -42,8 +42,10 @@ class DetailPlayerConfigurationView : Fragment("Edit player configuration") {
                     tab(find<PlayerConfigurationItemSlotsMaster>(
                         PlayerConfigurationItemSlotsMaster::configuration to configuration
                     ))
-                    tab("Available skills") {
-                        label("Molto bene")
+                    tab(find<PlayerConfigurationSkillsMaster>(
+                        PlayerConfigurationSkillsMaster::configuration to configuration
+                    )) {
+
                     }
                     tab(find<PlayerConfigurationStatisticsMaster>(
                         PlayerConfigurationItemSlotsMaster::configuration to configuration
