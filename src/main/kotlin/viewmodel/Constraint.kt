@@ -1,13 +1,21 @@
 package viewmodel
 
+import javafx.beans.property.Property
+import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
 import model.*
 import tornadofx.*
 import tornadofx.ItemViewModel
 
+enum class ConstraintType {
+    DICE, SKILL, STATISTIC, ITEM
+}
+
 interface ConstraintViewModel {
     val description : ReadOnlyStringProperty
+    val innerItem : ItemViewModel<out Constraint>
+    val type : ConstraintType
 }
 
 class DiceConstraintViewModel(constraint: DiceConstraint? = null) : ItemViewModel<DiceConstraint>(constraint), ConstraintViewModel {
@@ -15,7 +23,10 @@ class DiceConstraintViewModel(constraint: DiceConstraint? = null) : ItemViewMode
     val maxValue = bind(DiceConstraint::maxValue)
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Dice constraint (${minValue.value}, ${maxValue.value})")
+        get() = SimpleStringProperty("Min val = ${minValue.value}, Max val = ${maxValue.value})")
+
+    override val innerItem = this
+    override val type = ConstraintType.DICE
 }
 
 class SkillConstraintViewModel(constraint: SkillConstraint? = null) : ItemViewModel<SkillConstraint>(constraint), ConstraintViewModel {
@@ -23,7 +34,10 @@ class SkillConstraintViewModel(constraint: SkillConstraint? = null) : ItemViewMo
     val skillName = skillViewModel.select { it.name }
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Skill constraint (${skillName.value})")
+        get() = SimpleStringProperty("Skill = ${skillName.value})")
+
+    override val innerItem = this
+    override val type = ConstraintType.SKILL
 }
 
 class StatisticConstraintViewModel(constraint: StatisticConstraint? = null) : ItemViewModel<StatisticConstraint>(constraint), ConstraintViewModel {
@@ -33,7 +47,10 @@ class StatisticConstraintViewModel(constraint: StatisticConstraint? = null) : It
     val maxValue = bind(StatisticConstraint::maxValue)
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Statistic constraint (${statName.value}, ${minValue.value}, ${maxValue.value})")
+        get() = SimpleStringProperty("Statistic = ${statName.value}, Min val = ${minValue.value}, Max val = ${maxValue.value}")
+
+    override val innerItem = this
+    override val type = ConstraintType.STATISTIC
 }
 
 class ItemConstraintViewModel(constraint: ItemConstraint? = null) : ItemViewModel<ItemConstraint>(constraint), ConstraintViewModel {
@@ -43,6 +60,9 @@ class ItemConstraintViewModel(constraint: ItemConstraint? = null) : ItemViewMode
     val isConsumed = bind(ItemConstraint::isConsumed)
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Item constraint (${itemName.value}, ${quantity.value}, ${isConsumed.value})")
+        get() = SimpleStringProperty("Item = (${itemName.value}, Quantity = ${quantity.value}, Is consumed = ${isConsumed.value}")
+
+    override val innerItem = this
+    override val type = ConstraintType.ITEM
 }
 

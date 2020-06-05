@@ -5,10 +5,12 @@ import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
+import model.Constraint
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
+import viewmodel.ConstraintType
 import viewmodel.ConstraintViewModel
 import viewmodel.DetailStepViewModel
 import views.errorAlert
@@ -80,8 +82,9 @@ class DetailStepView : Fragment() {
                             label("Choice Constraints:")
                         }
                         center {
-                            tableview(selectedChoice.select { it.constraints }) {
+                            tableview(selectedChoice.select { it.constraints } ) {
                                 bindSelected(selectedConstraint)
+                                column<ConstraintViewModel, String>("Type") { it.value.type.toString().toProperty() }
                                 column("Description", ConstraintViewModel::description)
                             }
                         }
