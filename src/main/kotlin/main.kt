@@ -27,7 +27,7 @@ fun main(args: Array<String>) {
             SchemaUtils.create(
                 Adventures, Steps, Choices, DiceConstraints,
                 Skills, PlayerConfigurations, SkillsPlayerConfigurations, SkillConstraints,
-                Statistics, StatisticContraints, StatisticsSkills, Enemies, EnemiesStatistics,
+                Statistics, StatisticConstraints, StatisticsSkills, Enemies, EnemiesStatistics,
                 Items, ItemSlots, Loots, LootsItems, PlayerAvailableSlots, EnemiesSteps, StatisticsItems,
                 ItemConstraints, ItemSkillActivations, StatisticsPlayerConfigurations
             )
