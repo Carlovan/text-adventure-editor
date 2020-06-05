@@ -9,14 +9,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
+import viewmodel.ConstraintViewModel
 import viewmodel.DetailStepViewModel
 import views.errorAlert
 import views.flowgridpane
 import views.loot.SelectLootModal
 import views.runWithLoading
 import views.ui
-
-typealias ConstraintViewModel = String
 
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
@@ -83,7 +82,7 @@ class DetailStepView : Fragment() {
                         center {
                             tableview(selectedChoice.select { it.constraints }) {
                                 bindSelected(selectedConstraint)
-                                column<String, String>("Temp") { SimpleStringProperty(it.value) } // TODO
+                                column("Description", ConstraintViewModel::description)
                             }
                         }
                         left {
