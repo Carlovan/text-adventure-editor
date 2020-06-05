@@ -33,6 +33,10 @@ class DiceConstraint(id: EntityID<Int>) : Constraint(id, DiceConstraints) {
 
 object SkillConstraints : Constraints("SKILL_CONSTRAINT") {
     val skill = reference("skill", Skills)
+
+    init {
+        uniqueIndex(this.choice, skill)
+    }
 }
 
 class SkillConstraint(id: EntityID<Int>) : Constraint(id, SkillConstraints) {
@@ -45,6 +49,10 @@ object StatisticConstraints : Constraints("STATISTIC_CONSTRAINT") {
     val statistic = reference("statistic", Statistics)
     val minValue = integer("minValue").nullable()
     val maxValue = integer("maxValue").nullable()
+
+    init {
+        uniqueIndex(this.choice, statistic)
+    }
 }
 
 class StatisticConstraint(id: EntityID<Int>) : Constraint(id, StatisticConstraints) {
@@ -59,6 +67,10 @@ object ItemConstraints : Constraints("ITEM_CONSTRAINT") {
     val item = reference("item", Items)
     val quantity = integer("quantity").check { it greater 0 }
     val isConsumed = bool("is_consumed").default(false)
+
+    init {
+        uniqueIndex(this.choice, item)
+    }
 }
 
 class ItemConstraint(id: EntityID<Int>) : Constraint(id, ItemConstraints) {
