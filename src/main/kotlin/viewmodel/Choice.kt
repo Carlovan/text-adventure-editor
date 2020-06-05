@@ -2,6 +2,7 @@ package viewmodel
 
 import model.Choice
 import tornadofx.ItemViewModel
+import tornadofx.observableListOf
 import tornadofx.property
 
 fun Choice.fromViewModel(choice: ChoiceViewModel) {
@@ -12,4 +13,6 @@ fun Choice.fromViewModel(choice: ChoiceViewModel) {
 class ChoiceViewModel(choice: Choice? = null) : ItemViewModel<Choice>(choice) {
     val text = bind(Choice::text)
     val stepTo = property(choice?.stepTo?.let { StepViewModel(it) }).fxProperty
+
+    val constraints = property(observableListOf("test")).fxProperty // TODO
 }

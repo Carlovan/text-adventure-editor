@@ -3,17 +3,20 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
 import viewmodel.DetailStepViewModel
-import views.anySelected
 import views.errorAlert
+import views.flowgridpane
 import views.loot.SelectLootModal
 import views.runWithLoading
 import views.ui
+
+typealias ConstraintViewModel = String
 
 class DetailStepView : Fragment() {
     private val controller: StepController by inject()
@@ -22,6 +25,8 @@ class DetailStepView : Fragment() {
     val step: DetailStepViewModel by param()
     private val choices = observableListOf<ChoiceViewModel>()
     private val selectedChoice = SimpleObjectProperty<ChoiceViewModel>()
+
+    private val selectedConstraint = SimpleObjectProperty<ConstraintViewModel>()
 
     override val root = borderpane {
         paddingAll = 20.0
@@ -43,31 +48,59 @@ class DetailStepView : Fragment() {
                         action(::removeLoot)
                     }
                 }
-                label("Choices:")
-                borderpane {
-                    val choiceList = listview(choices) {
-                        bindSelected(selectedChoice)
-                        placeholder = label("No choices")
-                        cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number.value})" }
+                flowgridpane(1, 2) {
+                    hgap = 20.0
+                    paddingAll = 10.0
+                    borderpane {
+                        top { label("Choices:") }
+                        center {
+                            listview(choices) {
+                                bindSelected(selectedChoice)
+                                placeholder = label("No choices")
+                                cellFormat { text = "${it.text.value} (to step ${it.stepTo.value.number.value})" }
+                            }
+                        }
+                        left {
+                            vbox {
+                                paddingRight = 10.0
+                                spacing = 10.0
+                                button("Add") {
+                                    maxWidth = Double.MAX_VALUE
+                                    action(::addChoice)
+                                }
+                                button("Delete") {
+                                    enableWhen(selectedChoice.isNotNull)
+                                    maxWidth = Double.MAX_VALUE
+                                    action(::deleteChoice)
+                                }
+                            }
+                        }
                     }
-                    center = choiceList
-                    left {
-                        vbox {
-                            paddingRight = 10.0
-                            spacing = 10.0
-                            button("Add") {
-                                maxWidth = Double.MAX_VALUE
-                                action(::addChoice)
+                    borderpane {
+                        top {
+                            label("Choice Constraints:")
+                        }
+                        center {
+                            tableview(selectedChoice.select { it.constraints }) {
+                                bindSelected(selectedConstraint)
+                                column<String, String>("Temp") { SimpleStringProperty(it.value) } // TODO
                             }
-                            button("Delete") {
-                                enableWhen(choiceList.anySelected)
-                                maxWidth = Double.MAX_VALUE
-                                action(::deleteChoice)
-                            }
-                            button("Detail") {
-                                enableWhen(choiceList.anySelected)
-                                maxWidth = Double.MAX_VALUE
-                                action(::openDetail)
+                        }
+                        left {
+                            vbox {
+                                paddingRight = 10.0
+                                spacing = 10.0
+                                button("Add") {
+                                    action {
+                                        TODO()
+                                    }
+                                }
+                                button("Remove") {
+                                    enableWhen(selectedConstraint.isNotNull)
+                                    action{
+                                        TODO()
+                                    }
+                                }
                             }
                         }
                     }
@@ -119,10 +152,6 @@ class DetailStepView : Fragment() {
             }
             updateData()
         }
-    }
-
-    private fun openDetail() {
-        TODO()
     }
 
     private fun selectLoot() {
