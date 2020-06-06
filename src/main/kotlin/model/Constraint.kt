@@ -3,8 +3,6 @@ package model
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IdTable
-import org.omg.CORBA.portable.IDLEntity
 
 abstract class Constraints(name: String) : AdventureTable(name) {
     val choice = reference("choice", Choices)
@@ -52,6 +50,7 @@ object StatisticConstraints : Constraints("STATISTIC_CONSTRAINT") {
 
     init {
         uniqueIndex(this.choice, statistic)
+        check { minValue lessEq maxValue }
     }
 }
 

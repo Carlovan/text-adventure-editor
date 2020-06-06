@@ -3,14 +3,11 @@ package views.step
 import controller.ChoiceController
 import controller.StepController
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
-import model.Constraint
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
 import tornadofx.*
 import viewmodel.ChoiceViewModel
-import viewmodel.ConstraintType
 import viewmodel.ConstraintViewModel
 import viewmodel.DetailStepViewModel
 import views.errorAlert
@@ -27,6 +24,11 @@ class DetailStepView : Fragment() {
     private val choices = observableListOf<ChoiceViewModel>()
     private val selectedChoice = SimpleObjectProperty<ChoiceViewModel>()
 
+    init {
+        selectedChoice.onChange { updateConstraints() }
+    }
+
+    private val constraints = observableListOf<ConstraintViewModel>()
     private val selectedConstraint = SimpleObjectProperty<ConstraintViewModel>()
 
     override val root = borderpane {
@@ -82,7 +84,7 @@ class DetailStepView : Fragment() {
                             label("Choice Constraints:")
                         }
                         center {
-                            tableview(selectedChoice.select { it.constraints } ) {
+                            tableview(constraints) {
                                 bindSelected(selectedConstraint)
                                 column<ConstraintViewModel, String>("Type") { it.value.type.toString().toProperty() }
                                 column("Description", ConstraintViewModel::description)
@@ -93,15 +95,12 @@ class DetailStepView : Fragment() {
                                 paddingRight = 10.0
                                 spacing = 10.0
                                 button("Add") {
-                                    action {
-                                        TODO()
-                                    }
+                                    enableWhen(selectedChoice.isNotNull)
+                                    action(::addConstraint)
                                 }
                                 button("Remove") {
                                     enableWhen(selectedConstraint.isNotNull)
-                                    action{
-                                        TODO()
-                                    }
+                                    action(::removeConstraint)
                                 }
                             }
                         }
@@ -113,10 +112,12 @@ class DetailStepView : Fragment() {
             hbox {
                 spacing = 10.0
                 button("Save") {
+                    maxWidth = Double.MAX_VALUE
                     enableWhen(step.dirty)
                     action(::save)
                 }
                 button("Back") {
+                    maxWidth = Double.MAX_VALUE
                     action(::back)
                 }
             }
@@ -127,6 +128,15 @@ class DetailStepView : Fragment() {
         runWithLoading { transaction { step.choices } } ui {
             choices.clear()
             choices.addAll(it)
+        }
+    }
+
+    private fun updateConstraints() {
+        constraints.clear()
+        selectedChoice.value?.let { choice ->
+             runWithLoading { choice.constraints } ui {
+                 constraints.addAll(it)
+             }
         }
     }
 
@@ -162,6 +172,17 @@ class DetailStepView : Fragment() {
 
     private fun removeLoot() {
         step.loot.value = null
+    }
+
+    private fun removeConstraint() {
+        runWithLoading { choiceController.removeConstraint(selectedConstraint.value) } ui {
+            updateConstraints()
+        }
+    }
+
+    private fun addConstraint() {
+        find<AddConstraintModal>(AddConstraintModal::choice to selectedChoice.value).openModal(block = true)
+        updateConstraints()
     }
 
     override fun onDock() {
