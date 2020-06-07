@@ -105,8 +105,14 @@ class ItemForm : Fragment() {
                 textfield(item.name).required()
             }
             field("Item slot") {
-                combobox(item.itemSlotViewModel, itemSlotViewModels) { // TODO bound property is not formatted propertly
+                combobox(item.itemSlotViewModel, itemSlotViewModels) {
+                    items.onChange {
+                        val tmp = selectionModel.selectedItem
+                        selectionModel.clearSelection()
+                        selectionModel.select(tmp)
+                    }
                     cellFormat { text = it.name.value.ellipses(30) }
+                    valueProperty()
                     required()
                 }
             }
@@ -117,9 +123,9 @@ class ItemForm : Fragment() {
     }
 
     override fun onDock() {
-        runWithLoading { itemSlotsController.itemSlots } ui {
+        runWithLoading { itemSlotsController.itemSlots } ui { slots ->
             itemSlotViewModels.clear()
-            itemSlotViewModels.addAll(it)
+            itemSlotViewModels.addAll(slots)
             doneLoading.value = true
         }
     }

@@ -15,10 +15,26 @@ fun ItemSlot.fromViewModel(data: ItemSlotViewModel) {
 }
 
 class ItemSlotViewModel(initialValue: ItemSlot? = null) : tornadofx.ItemViewModel<ItemSlot>(initialValue) {
+    private val id = bind(ItemSlot::id)
     val name = bind(ItemSlot::name)
     val capacity = bind(ItemSlot::capacity, defaultValue = 1)
     fun saveData() {
         item?.fromViewModel(this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ItemSlotViewModel
+
+        if (id.value != other.id.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id.value.hashCode()
     }
 }
 

@@ -17,6 +17,7 @@ fun Loot.fromViewModel(loot: LootViewModel) {
 }
 
 class LootViewModel(loot: Loot? = null) : ItemViewModel<Loot>(loot) {
+    private val id = bind(Loot::id)
     val desc = bind(Loot::desc)
     val itemsCount = property(loot?.let { loot ->
         LootsItems.quantity.sum().alias("items_count").let { itemsCountAlias ->
@@ -33,6 +34,21 @@ class LootViewModel(loot: Loot? = null) : ItemViewModel<Loot>(loot) {
             fromViewModel(this@LootViewModel)
             rollback()
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LootViewModel
+
+        if (id.value != other.id.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id.value.hashCode()
     }
 }
 

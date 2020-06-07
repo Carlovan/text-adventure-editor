@@ -6,7 +6,8 @@ import tornadofx.*
 
 /**
  * Modal used to select something to be set somewhere.
- * Use the `selectedObject` property to get the selected object
+ * Use the `selectedObject` property to get the selected object.
+ * To correctly show the selected item in the combobox you should implement `equals` and `hashCode` for `T`
  */
 abstract class SelectObjectModal<T>(title: String = "") : Fragment(title) {
     /**
@@ -24,7 +25,12 @@ abstract class SelectObjectModal<T>(title: String = "") : Fragment(title) {
             vbox {
                 spacing = 10.0
                 label("Select item")
-                combobox(selectedObject, objects) { // TODO initial item is not correctly formatted
+                combobox(selectedObject, objects) {
+                    items.onChange {
+                        val tmp = selectionModel.selectedItem
+                        selectionModel.clearSelection()
+                        selectionModel.select(tmp)
+                    }
                     cellFormat {
                         text = cellFormatter(it)
                     }
