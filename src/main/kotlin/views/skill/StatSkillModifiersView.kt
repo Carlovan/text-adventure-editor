@@ -29,7 +29,7 @@ class StatSkillModifiersView : MasterView<StatSkillModifierViewModel>("Statistic
 
     override val root = vbox {
         label("Statistic modifiers")
-        add(createRoot())
+        add(createRoot(false))
     }
 
     override fun createDataTable(): TableView<StatSkillModifierViewModel> =

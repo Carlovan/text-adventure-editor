@@ -30,7 +30,7 @@ class ItemSkillActivationView : MasterView<ItemSkillActivationViewModel>("Item s
 
     override val root = vbox {
         label("Item activations")
-        add(createRoot())
+        add(createRoot(false))
     }
 
     override fun createDataTable(): TableView<ItemSkillActivationViewModel> =
