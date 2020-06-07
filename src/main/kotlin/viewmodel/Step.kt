@@ -37,9 +37,8 @@ class DetailStepViewModel(step: Step? = null) : ItemViewModel<Step>(step) {
     val text = bind(Step::text)
 
     val choices get() = item?.choices?.map { ChoiceViewModel(it) }?.toList()?.asObservable() ?: observableListOf()
-    val loot = bind {
-        SimpleObjectProperty<LootViewModel>(this, "ViewModelProperty", step?.loot?.let { LootViewModel(it) })
-    } as SimpleObjectProperty<LootViewModel?>
+    private val lootProperty = SimpleObjectProperty<LootViewModel>(this, "ViewModelProperty", step?.loot?.let { LootViewModel(it) })
+    val loot = bind { lootProperty } as SimpleObjectProperty<LootViewModel?> // TODO doesn't correctly update when the underlying model is updated
 
     fun saveData() {
         item?.also {

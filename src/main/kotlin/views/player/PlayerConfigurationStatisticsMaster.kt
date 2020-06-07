@@ -10,7 +10,6 @@ import peek
 import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.DetailPlayerConfigurationViewModel
-import viewmodel.SimplePlayerConfigurationViewModel
 import viewmodel.StatisticViewModel
 import views.SelectObjectModal
 import views.errorAlert
@@ -85,7 +84,7 @@ class PlayerConfigurationStatisticsMaster : Fragment("Available statistics") {
     }
 }
 
-class AddAvailableStatisticModal : SelectObjectModal<StatisticViewModel>("Select statistic") {
+class AddAvailableStatisticModal : SelectObjectModal<StatisticViewModel>("Select statistic", "statistic") {
     private val controller: StatisticController by inject()
 
     override fun getData() = controller.statistics

@@ -9,7 +9,7 @@ import tornadofx.*
  * Use the `selectedObject` property to get the selected object.
  * To correctly show the selected item in the combobox you should implement `equals` and `hashCode` for `T`
  */
-abstract class SelectObjectModal<T>(title: String = "") : Fragment(title) {
+abstract class SelectObjectModal<T>(title: String = "", objectName: String) : Fragment(title) {
     /**
      * This is used as return value. Can be set as parameter from TornadoFX or can be accessed from the object of [views.loot.SelectLootModal] itself.
      */
@@ -21,10 +21,10 @@ abstract class SelectObjectModal<T>(title: String = "") : Fragment(title) {
     abstract fun getData(): Collection<T>
 
     override val root: Parent = form {
-        fieldset("Add items") {
+        fieldset("Add $objectName") {
             vbox {
                 spacing = 10.0
-                label("Select item")
+                label("Select $objectName")
                 combobox(selectedObject, objects) {
                     items.onChange {
                         val tmp = selectionModel.selectedItem

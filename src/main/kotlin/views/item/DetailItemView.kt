@@ -33,7 +33,7 @@ class DetailItemView : Fragment("Edit item") {
             hbox {
                 spacing = 10.0
                 button("Save") {
-                    enableWhen(item.dirty)
+                    enableWhen(item.dirty or item.itemSlotViewModel.value.dirty)
                     action(::save)
                 }
                 button("Back") {

@@ -4,7 +4,7 @@ import controller.SkillController
 import viewmodel.SkillViewModel
 import views.SelectObjectModal
 
-class SelectSkillModal : SelectObjectModal<SkillViewModel>("Select skill") {
+class SelectSkillModal : SelectObjectModal<SkillViewModel>("Select skill", "skill") {
     private val controller: SkillController by inject()
 
     override fun getData() = controller.skills
