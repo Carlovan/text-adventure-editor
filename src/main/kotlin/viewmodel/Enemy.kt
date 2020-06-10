@@ -40,7 +40,7 @@ class EnemyStatValueViewModel(val enemy: Enemy, stat: Statistic? = null, value: 
     val statName = bind(Statistic::name) as ReadOnlyStringProperty
     val value = SimpleIntegerProperty(this, "ref", value ?: 0)
 
-    val statisticViewModel = SimpleObjectProperty(this, "ref2", StatisticViewModel(stat))
+    val statisticViewModel = SimpleObjectProperty<StatisticViewModel>(this, "ref2", stat?.let { StatisticViewModel(it) } )
 
     fun saveData(){
         EnemiesStatistics.update({ EnemiesStatistics.enemy eq enemy.id and (EnemiesStatistics.statistic eq item.id) }) {
