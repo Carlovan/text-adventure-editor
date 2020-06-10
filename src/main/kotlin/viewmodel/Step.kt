@@ -4,9 +4,9 @@ import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import model.Step
+import org.jetbrains.exposed.sql.transactions.transaction
+import tornadofx.*
 import tornadofx.ItemViewModel
-import tornadofx.asObservable
-import tornadofx.observableListOf
 
 fun Step.fromViewModel(step: StepViewModel) {
     number = step.number.value
@@ -37,8 +37,11 @@ class DetailStepViewModel(step: Step? = null) : ItemViewModel<Step>(step) {
     val text = bind(Step::text)
 
     val choices get() = item?.choices?.map { ChoiceViewModel(it) }?.toList()?.asObservable() ?: observableListOf()
-    private val lootProperty = SimpleObjectProperty<LootViewModel>(this, "ViewModelProperty", step?.loot?.let { LootViewModel(it) })
-    val loot = bind { lootProperty } as SimpleObjectProperty<LootViewModel?> // TODO doesn't correctly update when the underlying model is updated
+
+    val loot = bind {
+        transaction { item?.observable(Step::loot)?.select { it?.let { LootViewModel(it) }.toProperty() } }
+            ?: SimpleObjectProperty()
+    } as SimpleObjectProperty<LootViewModel?>
 
     fun saveData() {
         item?.also {
