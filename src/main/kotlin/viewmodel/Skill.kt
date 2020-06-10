@@ -69,7 +69,7 @@ class ItemSkillActivationViewModel(val skill: Skill, item: Item? = null, quantit
     val itemName = bind(Item::name) as ReadOnlyStringProperty
     val quantityRequired = SimpleIntegerProperty(this, "viewModelProperty", quantity ?: 1)
 
-    val itemViewModel = SimpleObjectProperty(this, "vmp", viewmodel.ItemViewModel(item))
+    val itemViewModel = SimpleObjectProperty<viewmodel.ItemViewModel>(this, "vmp", item?.let { viewmodel.ItemViewModel(it) } )
 
     fun saveData() {
         ItemSkillActivations.update({ ItemSkillActivations.skill eq skill.id and (ItemSkillActivations.item eq item.id) }) {

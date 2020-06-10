@@ -1,25 +1,15 @@
 package views.skill
 
-import controller.SkillController
-import javafx.scene.control.TableView
-import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
-import peek
-import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.DetailSkillViewModel
 import viewmodel.ItemSkillActivationViewModel
-import viewmodel.StatSkillModifierViewModel
-import views.*
+import views.runWithLoading
+import views.ui
 
 class DetailSkillView : Fragment() {
-    private val controller: SkillController by inject()
     val skill: DetailSkillViewModel by param()
-    var itemSkillActivationsTable: TableView<ItemSkillActivationViewModel> by singleAssign()
-    val itemSkillActivations = observableListOf<ItemSkillActivationViewModel>()
-
-    var statSkillModifiersTable: TableView<StatSkillModifierViewModel> by singleAssign()
-    val statSkillModifiers = observableListOf<StatSkillModifierViewModel>()
+    private val itemSkillActivations = observableListOf<ItemSkillActivationViewModel>()
 
     override val root = borderpane {
         paddingAll = 20.0
@@ -40,9 +30,7 @@ class DetailSkillView : Fragment() {
         bottom {
             hbox {
                 button("Back") {
-                    action {
-                        replaceWith<SkillsView>()
-                    }
+                    action(::back)
                 }
             }
         }

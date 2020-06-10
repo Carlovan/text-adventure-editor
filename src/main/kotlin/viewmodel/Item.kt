@@ -45,6 +45,7 @@ fun Item.fromViewModel(vm: viewmodel.ItemViewModel) {
 }
 
 class ItemViewModel(item: Item? = null) : tornadofx.ItemViewModel<Item>(item) {
+    private val id = bind(Item::id)
     val name = bind(Item::name)
     val isConsumable = bind(Item::isConsumable)
 
@@ -65,6 +66,21 @@ class ItemViewModel(item: Item? = null) : tornadofx.ItemViewModel<Item>(item) {
 
     fun saveData() {
         item?.fromViewModel(this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ItemViewModel
+
+        if (id.value != other.id.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 }
 

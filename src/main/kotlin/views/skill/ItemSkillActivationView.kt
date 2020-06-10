@@ -104,8 +104,7 @@ class CreateItemSkillActivationModal: Fragment("Create item skill activation") {
     override val root = form {
         fieldset("New item activation") {
             field("Item required") {
-                combobox(property = newItemSkillActivation.itemViewModel) {
-                    items = itemViewModels
+                combobox(newItemSkillActivation.itemViewModel, itemViewModels) {
                     cellFormat { text = "[${it.slotName.value}] ${it.name.value.ellipses(30)}" }
                     required()
                 }
