@@ -82,7 +82,7 @@ class StatSkillModifierViewModel(val skill: Skill, stat: Statistic? = null, valu
     val statName = bind(Statistic::name) as ReadOnlyStringProperty
     val valueMod = SimpleIntegerProperty(this, "viewModelProperty", valueMod ?: 0)
 
-    val statViewModel = SimpleObjectProperty(this, "vmp", StatisticViewModel(stat))
+    val statViewModel = SimpleObjectProperty<StatisticViewModel>(this, "vmp", stat?.let { StatisticViewModel(it) } )
 
     fun saveData() {
         StatisticsSkills.update({ StatisticsSkills.skill eq skill.id and (StatisticsSkills.statistic eq item.id) }) {

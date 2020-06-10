@@ -27,7 +27,7 @@ class StatisticViewModel(stat: Statistic? = null) : ItemViewModel<Statistic>(sta
     }
 
     override fun hashCode(): Int {
-        return id.value.hashCode()
+        return id.value?.hashCode() ?: super.hashCode()
     }
 
 

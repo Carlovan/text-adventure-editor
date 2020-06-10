@@ -98,8 +98,7 @@ class CreateStatSkillModifierModal : Fragment("Create statistic skill modifier")
     override val root = form {
         fieldset("New statistic modifier") {
             field("Statistic") {
-                combobox(property = newStatSkillModifier.statViewModel) {
-                    items = statViewModels
+                combobox(newStatSkillModifier.statViewModel, statViewModels) {
                     cellFormat { text = it.name.value.ellipses(30) }
                     required()
                 }
