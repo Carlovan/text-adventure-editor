@@ -65,7 +65,6 @@ class SelectAdventureView : View("Select adventure"){
                     enableWhen(newAdventure.valid)
                     action {
                         runWithLoading { controller.createAdventure(newAdventure, true) } ui {
-                            println("Create adventure in ${Thread.currentThread().name}")
                                 it.peek {
                                     errorAlert {
                                         when (it) {

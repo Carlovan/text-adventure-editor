@@ -51,7 +51,6 @@ class PlayerConfigurationController : ControllerWithContextAdventure() {
 
     fun addSlot(configuration: SimplePlayerConfigurationViewModel, slot: PlayerAvailableSlotViewModel) =
         safeTransaction {
-            println("In safeTransaction")
             PlayerAvailableSlots.insert {
                 it[itemSlot] = slot.itemSlot.value.item.id
                 it[playerConf] = configuration.item.id

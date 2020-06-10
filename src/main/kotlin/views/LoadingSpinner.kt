@@ -14,7 +14,6 @@ fun <T> UIComponent.runWithLoading(op: () -> T): CompletableFuture<T> {
         }.open(spinner, owner = currentStage?.scene?.root ?: primaryStage.scene.root)
     }
     return CompletableFuture.supplyAsync(Supplier {
-        println(Thread.currentThread().name)
         op()
     }, ExposedExecutor).whenComplete { _, _ -> runLater { spinner.close() } }
 }

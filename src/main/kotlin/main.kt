@@ -16,7 +16,6 @@ fun main(args: Array<String>) {
             password = "gaheANeHTMOYDd2tfko7HGmN",
             manager = { ThreadLocalTransactionManager(it, 0) }
         )
-        println(Thread.currentThread().name)
 
         transaction {
             addLogger(StdOutSqlLogger)
