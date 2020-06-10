@@ -6,6 +6,7 @@ import model.Statistic
 import model.StatisticsItems
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import toStringWithSign
 import tornadofx.*
 
@@ -49,7 +50,7 @@ class ItemViewModel(item: Item? = null) : tornadofx.ItemViewModel<Item>(item) {
     val name = bind(Item::name)
     val isConsumable = bind(Item::isConsumable)
 
-    val itemSlotViewModel = property(item?.itemSlot?.let { ItemSlotViewModel(it) }).fxProperty
+    val itemSlotViewModel = bind { property(transaction { item?.itemSlot?.let { ItemSlotViewModel(it) } }).fxProperty }
     val slotName = itemSlotViewModel.select { it.name }
 
     val modifiedStats
