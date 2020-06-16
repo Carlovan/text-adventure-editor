@@ -10,6 +10,7 @@ import tornadofx.*
 import viewmodel.ChoiceViewModel
 import viewmodel.ConstraintViewModel
 import viewmodel.DetailStepViewModel
+import viewmodel.EnemyStepViewModel
 import views.errorAlert
 import views.flowgridpane
 import views.loot.SelectLootModal
@@ -22,7 +23,9 @@ class DetailStepView : Fragment() {
 
     val step: DetailStepViewModel by param()
     private val choices = observableListOf<ChoiceViewModel>()
+    private val enemies = observableListOf<EnemyStepViewModel>()
     private val selectedChoice = SimpleObjectProperty<ChoiceViewModel>()
+    private val selectedEnemy = SimpleObjectProperty<EnemyStepViewModel>()
 
     init {
         selectedChoice.onChange { updateConstraints() }
@@ -105,6 +108,31 @@ class DetailStepView : Fragment() {
                             }
                         }
                     }
+                    borderpane {
+                        top { label("Enemies:") }
+                        center {
+                            listview(enemies) {
+                                bindSelected(selectedEnemy)
+                                placeholder = label("No enemies")
+                                cellFormat { text = "${it.enemyName.value} (${it.quantity.value})" }
+                            }
+                        }
+                        left {
+                            vbox {
+                                paddingRight = 10.0
+                                spacing = 10.0
+                                button("Add") {
+                                    maxWidth = Double.MAX_VALUE
+                                    action(::addEnemy)
+                                }
+                                button("Delete") {
+                                    enableWhen(selectedEnemy.isNotNull)
+                                    maxWidth = Double.MAX_VALUE
+                                    action(::deleteEnemy)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -128,6 +156,11 @@ class DetailStepView : Fragment() {
         runWithLoading { transaction { step.choices } } ui {
             choices.clear()
             choices.addAll(it)
+
+            runWithLoading { transaction { step.enemies } } ui {
+                enemies.clear()
+                enemies.addAll(it)
+            }
         }
     }
 
@@ -161,6 +194,20 @@ class DetailStepView : Fragment() {
         runWithLoading { choiceController.deleteChoice(selectedChoice.value) } ui {
             it.peek {
                 errorAlert { "Cannot delete choice" }
+            }
+            updateData()
+        }
+    }
+
+    private fun addEnemy() {
+        find<AddEnemyStepModal>(AddEnemyStepModal::step to step).openModal(block = true)
+        updateData()
+    }
+
+    private fun deleteEnemy() {
+        runWithLoading { controller.deleteEnemy(selectedEnemy.value) } ui {
+            it.peek {
+                errorAlert { "Cannot delete enemy" }
             }
             updateData()
         }

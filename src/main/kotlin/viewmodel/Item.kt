@@ -1,5 +1,7 @@
 package viewmodel
 
+import javafx.beans.property.Property
+import javafx.beans.property.SimpleObjectProperty
 import model.Item
 import model.ItemSlot
 import model.Statistic
@@ -12,13 +14,13 @@ import tornadofx.*
 
 fun ItemSlot.fromViewModel(data: ItemSlotViewModel) {
     name = data.name.value
-    capacity = data.capacity.value
+    capacity = if(data.capacity.value == 0) null else data.capacity.value
 }
 
 class ItemSlotViewModel(initialValue: ItemSlot? = null) : tornadofx.ItemViewModel<ItemSlot>(initialValue) {
     private val id = bind(ItemSlot::id)
     val name = bind(ItemSlot::name)
-    val capacity = bind(ItemSlot::capacity, defaultValue = 1)
+    val capacity = bind(ItemSlot::capacity)
     fun saveData() {
         item?.fromViewModel(this)
     }

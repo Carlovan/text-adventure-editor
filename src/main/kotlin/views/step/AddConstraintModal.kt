@@ -12,10 +12,7 @@ import sqlutils.PSQLState
 import tornadofx.*
 import viewmodel.*
 import viewmodel.ItemViewModel
-import views.errorAlert
-import views.requiredPositiveInteger
-import views.runWithLoading
-import views.ui
+import views.*
 
 abstract class ConstraintForm : Fragment() {
     abstract val newConstraint: ConstraintViewModel
@@ -31,14 +28,12 @@ class DiceConstraintForm : ConstraintForm() {
         fieldset {
             field("Minimum value") {
                 textfield(newDiceConstraint.minValue) {
-                    required()
                     requiredPositiveInteger()
                     text = "0"
                 }
             }
             field("Maximum value") {
                 textfield(newDiceConstraint.maxValue) {
-                    required()
                     requiredPositiveInteger()
                     text = "6"
                 }
@@ -96,15 +91,13 @@ class StatisticConstraintForm : ConstraintForm() {
             }
             field("Minimum value") {
                 textfield(newStatisticConstraint.minValue) {
-                    required()
-                    requiredPositiveInteger()
+                    requiredInteger()
                     text = "0"
                 }
             }
             field("Maximum value") {
                 textfield(newStatisticConstraint.maxValue) {
-                    required()
-                    requiredPositiveInteger()
+                    requiredInteger()
                     text = "10"
                 }
             }

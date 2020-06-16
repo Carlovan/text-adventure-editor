@@ -27,7 +27,7 @@ class ItemSlotsView : MasterView<ItemSlotViewModel>("Item slots") {
             column("Name", ItemSlotViewModel::name).makeEditable()
             column("Capacity", ItemSlotViewModel::capacity) {
                 cellFormat {
-                    text = if (it == 0) "∞" else it.toString()
+                    text = if(it == 0) "∞" else it.toString()
                 }
             }
         }

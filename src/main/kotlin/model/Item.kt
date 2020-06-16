@@ -4,10 +4,12 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.or
+import javax.management.Query.eq
 
 object ItemSlots : AdventureTable("ITEM_SLOT") {
     val name = varchar("name", 32)
-    val capacity = integer("capacity").check { it greaterEq 0 } // If 0 capacity is infinite
+    val capacity = integer("capacity").nullable().check { it greater 0 }
 
     init {
         uniqueIndex(adventure, name)

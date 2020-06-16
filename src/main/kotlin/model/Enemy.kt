@@ -59,6 +59,6 @@ object EnemiesStatistics : Table("ENEMY_STATISTIC") {
 object EnemiesSteps : Table("ENEMY_STEP") {
     val enemy = reference("enemy", Enemies)
     val step = reference("step", Steps)
-    val number = integer("value").check { it greater 0 }
+    val quantity = integer("quantity").check { it greater 0 }
     override val primaryKey = PrimaryKey(enemy, step)
 }

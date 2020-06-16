@@ -22,7 +22,7 @@ class DiceConstraintViewModel(constraint: DiceConstraint? = null) : ItemViewMode
     val maxValue = bind(DiceConstraint::maxValue)
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Min val = ${minValue.value}, Max val = ${maxValue.value}")
+        get() = SimpleStringProperty("Min val = ${if(minValue.value == 0) "-∞" else minValue.value.toString()}, Max val = ${if(maxValue.value == 0) "∞" else maxValue.value.toString()}")
 
     override val innerItem = this
     override val type = ConstraintType.DICE
@@ -46,7 +46,7 @@ class StatisticConstraintViewModel(constraint: StatisticConstraint? = null) : It
     val maxValue = bind(StatisticConstraint::maxValue)
 
     override val description: ReadOnlyStringProperty
-        get() = SimpleStringProperty("Statistic = '${statName.value}', Min val = ${minValue.value}, Max val = ${maxValue.value}")
+        get() = SimpleStringProperty("Statistic = '${statName.value}', Min val = ${if(minValue.value == 0) "-∞" else minValue.value.toString()}, Max val = ${if(maxValue.value == 0) "∞" else maxValue.value.toString()}")
 
     override val innerItem = this
     override val type = ConstraintType.STATISTIC

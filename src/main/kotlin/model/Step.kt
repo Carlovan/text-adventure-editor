@@ -30,8 +30,8 @@ class Step(id: EntityID<Int>) : IntEntity(id) {
 object Choices : AdventureTable("CHOICE") {
     val text = text("text")
 
-    val stepTo = reference("stepTo", Steps)
-    val stepFrom = reference("stepFrom", Steps)
+    val stepTo = reference("step_to", Steps)
+    val stepFrom = reference("step_from", Steps)
 }
 
 class Choice(id: EntityID<Int>) : IntEntity(id) {

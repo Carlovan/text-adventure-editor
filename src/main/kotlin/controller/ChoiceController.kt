@@ -33,8 +33,8 @@ class ChoiceController: ControllerWithContextAdventure() {
         DiceConstraint.new {
             adventure = contextAdventure!!.item.id
             this.choice = choice.item.id
-            minValue = constraint.minValue.value
-            maxValue = constraint.maxValue.value
+            minValue = if(constraint.minValue.value == 0) null else constraint.minValue.value
+            maxValue = if(constraint.maxValue.value == 0) null else constraint.maxValue.value
         }
     }
 
@@ -51,8 +51,8 @@ class ChoiceController: ControllerWithContextAdventure() {
             adventure = contextAdventure!!.item.id
             this.choice = choice.item.id
             statistic = constraint.statViewModel.value.item
-            minValue = constraint.minValue.value
-            maxValue = constraint.maxValue.value
+            minValue = if(constraint.minValue.value == 0) null else constraint.minValue.value
+            maxValue = if(constraint.maxValue.value == 0) null else constraint.maxValue.value
         }
     }
 

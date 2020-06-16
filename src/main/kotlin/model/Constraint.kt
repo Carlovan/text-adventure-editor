@@ -3,6 +3,8 @@ package model
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.not
 
 abstract class Constraints(name: String) : AdventureTable(name) {
     val choice = reference("choice", Choices)
@@ -14,11 +16,12 @@ abstract class Constraint(id: EntityID<Int>, table: Constraints) : IntEntity(id)
 }
 
 object DiceConstraints : Constraints("DICE_CONSTRAINT") {
-    val minValue = integer("minValue").nullable().check { it greaterEq 0 }
-    val maxValue = integer("maxValue").nullable()
+    val minValue = integer("min_value").nullable().check { it greater 0 }
+    val maxValue = integer("max_value").nullable()
 
     init {
         check { minValue lessEq maxValue }
+        check { not(minValue eq null as Int? and(maxValue eq null as Int?)) }
     }
 }
 
@@ -45,12 +48,13 @@ class SkillConstraint(id: EntityID<Int>) : Constraint(id, SkillConstraints) {
 
 object StatisticConstraints : Constraints("STATISTIC_CONSTRAINT") {
     val statistic = reference("statistic", Statistics)
-    val minValue = integer("minValue").nullable()
-    val maxValue = integer("maxValue").nullable()
-
+    val minValue = integer("min_value").nullable()
+    val maxValue = integer("max_value")
+        .nullable()
     init {
         uniqueIndex(this.choice, statistic)
         check { minValue lessEq maxValue }
+        check { not(minValue eq null as Int? and(maxValue eq null as Int?)) }
     }
 }
 

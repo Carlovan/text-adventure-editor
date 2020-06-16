@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import model.EnemiesStatistics
+import model.EnemiesSteps
 import tornadofx.ItemViewModel
 import model.Enemy
 import model.Statistic
@@ -45,6 +46,19 @@ class EnemyStatValueViewModel(val enemy: Enemy, stat: Statistic? = null, value: 
     fun saveData(){
         EnemiesStatistics.update({ EnemiesStatistics.enemy eq enemy.id and (EnemiesStatistics.statistic eq item.id) }) {
             it[EnemiesStatistics.value] = this@EnemyStatValueViewModel.value.value
+        }
+    }
+}
+
+class EnemyStepViewModel(val step: model.Step, enemy: Enemy? = null, quantity: Int? = null) : ItemViewModel<Enemy>(enemy) {
+    val enemyName = bind(Enemy::name)
+    val quantity = SimpleIntegerProperty(this, "ref", quantity ?: 1)
+
+    val enemyViewModel = SimpleObjectProperty<EnemyViewModel>(this, "ref2", enemy?.let { EnemyViewModel(it) } )
+
+    fun saveData(){
+        EnemiesSteps.update({EnemiesSteps.enemy eq item.id and (EnemiesSteps.step eq step.id)}) {
+            it[EnemiesSteps.quantity] = this@EnemyStepViewModel.quantity.value
         }
     }
 }
