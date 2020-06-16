@@ -2,6 +2,7 @@ package views.player
 
 import controller.PlayerConfigurationController
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import onEmpty
 import org.jetbrains.exposed.sql.transactions.transaction
 import peek
@@ -27,7 +28,7 @@ class PlayerConfigurationItemSlotsMaster : Fragment("Item slots") {
                 selectedSlot.bind(selectionModel.selectedItemProperty())
                 column("Name", PlayerAvailableSlotViewModel::name)
                 column<PlayerAvailableSlotViewModel, String>("Slot type") { it.value.itemSlot.value.name }
-                column<PlayerAvailableSlotViewModel, Int>("Slot capacity") { it.value.itemSlot.value.capacity }
+                column<PlayerAvailableSlotViewModel, String>("Slot capacity") { SimpleStringProperty(if(it.value.itemSlot.value.capacity.value == 0) "∞" else it.value.itemSlot.value.capacity.value.toString())}
             }
         }
         left {
