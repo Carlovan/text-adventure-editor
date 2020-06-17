@@ -27,3 +27,6 @@ I comandi principali sono:
  * 'build' per compilare l'applicazione
  * 'run' per compilare ed eseguire l'applicazione
  * 'jar' per compilare l'applicazione ed ottenere un file JAR eseguibile, che verrà salvato nella cartella principale del progetto
+
+Per semplicità è possibile ottenere il JAR pronto dal seguente link
+https://github.com/Carlovan/text-adventure-editor/releases/download/v1.0/text-advendure-editor-1.0.jar
