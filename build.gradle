@@ -49,4 +49,5 @@ jar {
     }
 
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    destinationDir = file("$rootDir")
 }
